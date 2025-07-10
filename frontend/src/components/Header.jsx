@@ -1,11 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Lightbulb, Zap } from 'lucide-react';
+import { Menu, X, Lightbulb, Zap, LogOut, User as UserIcon } from 'lucide-react';
 import { useRef } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { signoutSuccess } from '../redux/user/userSlice';
+import { useNavigate } from 'react-router-dom';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [hoveredNav, setHoveredNav] = useState(null);
+  const user = useSelector(state => state.user.currentUser);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -14,6 +23,21 @@ export default function Header() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    }
+    if (dropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [dropdownOpen]);
 
   // Dropdown content for each nav item
   const navDropdowns = {
@@ -149,11 +173,92 @@ export default function Header() {
             `}</style>
           </nav>
 
-          {/* CTA Buttons */}
+          {/* CTA/Profile Dropdown */}
           <div className="hidden md:flex items-center">
-            <button className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-2 rounded-full shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 font-semibold cursor-pointer">
-              Sign In
-            </button>
+            {user ? (
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  className="flex items-center gap-3 px-3 py-2 rounded-full bg-white/70 shadow-md hover:shadow-lg border border-purple-100 hover:border-purple-300 transition-all duration-200 cursor-pointer focus:outline-none"
+                  onClick={() => setDropdownOpen(v => !v)}
+                  aria-haspopup="true"
+                  aria-expanded={dropdownOpen}
+                >
+                  {user.profilePicture ? (
+                    <img src={user.profilePicture} alt="avatar" className="w-9 h-9 rounded-full object-cover border-2 border-purple-300" />
+                  ) : (
+                    <span className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-pink-400 flex items-center justify-center text-white font-bold text-lg border-2 border-purple-300">
+                      {user.username ? user.username[0].toUpperCase() : (user.email ? user.email[0].toUpperCase() : '?')}
+                    </span>
+                  )}
+                  <span className="font-semibold text-gray-800 text-base max-w-[120px] truncate">
+                    {user.username || user.email}
+                  </span>
+                  <svg className={`w-4 h-4 ml-1 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                </button>
+                {dropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-purple-100 py-4 z-50 animate-fadeInDropdown flex flex-col items-stretch" style={{boxShadow: '0 8px 32px 0 rgba(80,0,200,0.10)'}}>
+                    {/* Gradient accent bar */}
+                    <div className="h-1 w-full rounded-t-3xl bg-gradient-to-r from-purple-500 via-pink-400 to-blue-400 mb-3" />
+                    {/* User info */}
+                    <div className="flex items-center gap-3 px-5 pb-3">
+                      {user.profilePicture ? (
+                        <img src={user.profilePicture} alt="avatar" className="w-11 h-11 rounded-full object-cover border-2 border-purple-300" />
+                      ) : (
+                        <span className="w-11 h-11 rounded-full bg-gradient-to-br from-purple-500 to-pink-400 flex items-center justify-center text-white font-bold text-xl border-2 border-purple-300">
+                          {user.username ? user.username[0].toUpperCase() : (user.email ? user.email[0].toUpperCase() : '?')}
+                        </span>
+                      )}
+                      <div className="flex flex-col">
+                        <span className="font-bold text-gray-900 text-base leading-tight truncate max-w-[120px]">{user.username || user.email}</span>
+                        {user.email && user.username && (
+                          <span className="text-xs text-gray-500 truncate max-w-[120px]">{user.email}</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="my-2 border-t border-purple-100" />
+                    <a
+                      href="/profile"
+                      className="block px-5 py-3 text-gray-800 hover:bg-purple-50 hover:text-purple-700 font-semibold rounded-2xl transition-all duration-200 cursor-pointer text-base flex items-center gap-3"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      <UserIcon className="w-5 h-5 text-purple-500" />
+                      Profile
+                    </a>
+                    <button
+                      className="block w-full text-left px-5 py-3 text-gray-800 hover:bg-pink-50 hover:text-pink-600 font-semibold rounded-2xl transition-all duration-200 cursor-pointer text-base mt-1 flex items-center gap-3"
+                      onClick={async () => {
+                        setSigningOut(true);
+                        try {
+                          const res = await fetch('/backend/auth/logout', { method: 'POST', credentials: 'include' });
+                          const data = await res.json();
+                          if (res.ok && data.success) {
+                            dispatch(signoutSuccess());
+                            setDropdownOpen(false);
+                            navigate('/sign-in');
+                          } else {
+                            alert(data.message || 'Sign out failed.');
+                          }
+                        } catch (err) {
+                          alert('Sign out failed.');
+                        }
+                        setSigningOut(false);
+                      }}
+                      disabled={signingOut}
+                    >
+                      <LogOut className="w-5 h-5 text-pink-500" />
+                      {signingOut ? 'Signing out...' : 'Sign out'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button 
+                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-2 rounded-full shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 font-semibold cursor-pointer"
+                onClick={() => { window.location.href = '/sign-in'; }}
+              >
+                Sign In
+              </button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -201,9 +306,59 @@ export default function Header() {
             <a href="#promote" className="text-lg font-semibold text-blue-700 hover:text-purple-600 transition-colors py-2 cursor-pointer">Promote</a>
           </nav>
           <div className="px-6 pb-8 pt-2">
-            <button className="w-full py-3 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-lg cursor-pointer">
-              Sign In
-            </button>
+            {user ? (
+              <div className="flex flex-col items-center w-full gap-4">
+                <div className="flex flex-col items-center w-full mb-2">
+                  {user.profilePicture ? (
+                    <img src={user.profilePicture} alt="avatar" className="w-14 h-14 rounded-full object-cover border-2 border-purple-300 mb-2" />
+                  ) : (
+                    <span className="w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-pink-400 flex items-center justify-center text-white font-bold text-2xl border-2 border-purple-300 mb-2">
+                      {user.username ? user.username[0].toUpperCase() : (user.email ? user.email[0].toUpperCase() : '?')}
+                    </span>
+                  )}
+                  <span className="font-semibold text-gray-800 text-base max-w-[160px] truncate text-center">
+                    {user.username || user.email}
+                  </span>
+                </div>
+                <a
+                  href="/profile"
+                  className="w-full py-3 rounded-xl bg-white/90 text-gray-800 font-semibold shadow-md hover:bg-purple-50 hover:text-purple-700 transition-colors duration-200 cursor-pointer text-center mb-2"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Profile
+                </a>
+                <button
+                  className="w-full py-3 rounded-xl bg-white/90 text-gray-800 font-semibold shadow-md hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200 cursor-pointer text-center"
+                  onClick={async () => {
+                    setSigningOut(true);
+                    try {
+                      const res = await fetch('/backend/auth/logout', { method: 'POST', credentials: 'include' });
+                      const data = await res.json();
+                      if (res.ok && data.success) {
+                        dispatch(signoutSuccess());
+                        setIsMenuOpen(false);
+                        navigate('/sign-in');
+                      } else {
+                        alert(data.message || 'Sign out failed.');
+                      }
+                    } catch (err) {
+                      alert('Sign out failed.');
+                    }
+                    setSigningOut(false);
+                  }}
+                  disabled={signingOut}
+                >
+                  {signingOut ? 'Signing out...' : 'Sign out'}
+                </button>
+              </div>
+            ) : (
+              <button
+                className="w-full py-3 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-lg cursor-pointer text-center"
+                onClick={() => { window.location.href = '/sign-in'; }}
+              >
+                Sign In
+              </button>
+            )}
           </div>
         </aside>
         {/* End Mobile Sidebar */}
