@@ -142,3 +142,63 @@ export const logout = (req, res) => {
   });
   res.status(200).json({ success: true, message: 'Signed out successfully.' });
 };
+
+export const getProfile = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    res.status(200).json(user);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateProfile = async (req, res, next) => {
+  try {
+    const updateFields = { ...req.body };
+    // If resume file uploaded, set resume field
+    if (req.file && req.file.path) {
+      updateFields.resume = {
+        path: req.file.path,
+        originalName: req.file.originalname
+      };
+    }
+    // Mark profile as completed if all required fields are present
+    const requiredFields = ['fullName', 'skills', 'location', 'bio', 'role', 'userType'];
+    let isProfileCompleted = true;
+    for (const field of requiredFields) {
+      if (!updateFields[field] || updateFields[field] === '') {
+        isProfileCompleted = false;
+        break;
+      }
+    }
+    updateFields.isProfileCompleted = isProfileCompleted;
+    // Parse bestWorks if sent as JSON string
+    if (updateFields.bestWorks && typeof updateFields.bestWorks === 'string') {
+      try {
+        updateFields.bestWorks = JSON.parse(updateFields.bestWorks);
+      } catch (e) {
+        // fallback: ignore or set to []
+        updateFields.bestWorks = [];
+      }
+    }
+    const user = await User.findByIdAndUpdate(req.user.id, updateFields, { new: true, runValidators: true }).select('-password');
+    res.status(200).json(user);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteAccount = async (req, res, next) => {
+  try {
+    await User.findByIdAndDelete(req.user.id);
+    res.clearCookie('access_token', {
+      httpOnly: true,
+      sameSite: 'None',
+      secure: true,
+    });
+    res.status(200).json({ success: true, message: 'Account deleted successfully.' });
+  } catch (err) {
+    next(err);
+  }
+};

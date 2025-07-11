@@ -31,6 +31,9 @@ mongoose.connect(MONGODB_URI)
 
 app.use('/backend/auth', authRoutes);
 
+// Serve resumes as static files
+app.use('/uploads/resumes', express.static(path.resolve('uploads/resumes')));
+
 
 app.use(express.static(path.join(__dirname, 'frontend/dist')));
 
