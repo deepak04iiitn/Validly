@@ -21,3 +21,4 @@ export const verifyToken = (req , res , next) => {
 }
 
 export const verifyUser = verifyToken;
+export default verifyUser;

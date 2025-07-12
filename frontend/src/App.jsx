@@ -6,6 +6,8 @@ import Footer from './components/Footer';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Profile from './pages/Profile';
+import Ideas from './pages/Ideas';
+import Progress from './pages/Progress';
 
 
 export default function App() {
@@ -19,6 +21,8 @@ export default function App() {
             <Route path='/sign-in' element={<SignIn />} />
             <Route path='/sign-up' element={<SignUp />} />
             <Route path='/profile' element={<Profile />} />
+            <Route path='/ideas' element={<Ideas />} />
+            <Route path='/progress' element={<Progress />} />
           </Routes>
         </div>
         <Footer />

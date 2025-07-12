@@ -106,6 +106,16 @@ export default function Header() {
   };
   const allDropdowns = { ...navDropdowns, ...promoteDropdown };
 
+  // Map nav keys to routes
+  const navRoutes = {
+    Ideas: '/ideas',
+    Collaborate: '/collaborate',
+    Mentorship: '/mentorship',
+    Communities: '/communities',
+    Progress: '/progress',
+    Promote: '/promote',
+  };
+
   return (
     <header className={`fixed w-full top-0 z-50 transition-all duration-300 ${
       isScrolled ? 'bg-white/95 backdrop-blur-lg shadow-lg' : 'bg-transparent'
@@ -131,14 +141,16 @@ export default function Header() {
                 onMouseLeave={() => setHoveredNav(null)}
                 tabIndex={0}
               >
-                <a
-                  href={`#${key.toLowerCase()}`}
+                <button
+                  type="button"
+                  onClick={() => navigate(navRoutes[key])}
                   className={`text-gray-700 hover:text-purple-600 transition-colors font-medium px-2 py-1 rounded cursor-pointer focus:outline-none focus:text-purple-700 ${key === 'Promote' ? 'font-bold text-blue-700' : ''}`}
                   aria-haspopup="true"
                   aria-expanded={hoveredNav === key}
+                  style={{ background: 'none', border: 'none' }}
                 >
                   {key}
-                </a>
+                </button>
                 {/* Dropdown */}
                 {hoveredNav === key && (
                   <div
@@ -298,12 +310,17 @@ export default function Header() {
             </button>
           </div>
           <nav className="flex-1 flex flex-col gap-2 px-6 py-8 overflow-y-auto">
-            <a href="#ideas" className="text-lg font-semibold text-gray-800 hover:text-purple-600 transition-colors py-2 cursor-pointer">Ideas</a>
-            <a href="#collaborate" className="text-lg font-semibold text-gray-800 hover:text-purple-600 transition-colors py-2 cursor-pointer">Collaborate</a>
-            <a href="#mentorship" className="text-lg font-semibold text-gray-800 hover:text-purple-600 transition-colors py-2 cursor-pointer">Mentorship</a>
-            <a href="#communities" className="text-lg font-semibold text-gray-800 hover:text-purple-600 transition-colors py-2 cursor-pointer">Communities</a>
-            <a href="#progress" className="text-lg font-semibold text-gray-800 hover:text-purple-600 transition-colors py-2 cursor-pointer">Progress</a>
-            <a href="#promote" className="text-lg font-semibold text-blue-700 hover:text-purple-600 transition-colors py-2 cursor-pointer">Promote</a>
+            {Object.keys(navRoutes).map((key) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => { setIsMenuOpen(false); navigate(navRoutes[key]); }}
+                className={`text-lg font-semibold ${key === 'Promote' ? 'text-blue-700' : 'text-gray-800'} hover:text-purple-600 transition-colors py-2 cursor-pointer text-left w-full`}
+                style={{ background: 'none', border: 'none' }}
+              >
+                {key}
+              </button>
+            ))}
           </nav>
           <div className="px-6 pb-8 pt-2">
             {user ? (
