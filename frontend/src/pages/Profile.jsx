@@ -9,71 +9,74 @@ import getCroppedImg from '../utils/cropImage';
 
 // --- Reusable Input Components ---
 const FloatingInput = ({ name, value, onChange, type = 'text', required = false, placeholder, icon: Icon, className = '' }) => (
-  <div className="relative group">
-    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-violet-500 z-10">
-      <Icon size={18} />
-    </div>
-    <input
-      type={type}
-      name={name}
-      value={value}
-      onChange={onChange}
-      required={required}
-      className={`peer w-full pl-12 pr-4 py-4 bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500/50 transition-all duration-300 placeholder-transparent text-slate-700 shadow-sm hover:border-slate-300/80 ${className}`}
-      placeholder=" "
-    />
-    <label className={`absolute left-12 transition-all duration-300 pointer-events-none ${value ? 'top-2 text-xs text-violet-600 font-medium' : 'top-1/2 -translate-y-1/2 text-slate-500 peer-focus:top-2 peer-focus:text-xs peer-focus:text-violet-600 peer-focus:font-medium'}`}>
+  <div className="space-y-2">
+    <label className="block text-sm font-medium text-slate-700 ml-1">
       {placeholder} {required && <span className="text-red-400">*</span>}
     </label>
+    <div className="relative group">
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-violet-500 z-10">
+        <Icon size={18} />
+      </div>
+      <input
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        required={required}
+        className={`w-full pl-12 pr-4 py-4 bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500/50 transition-all duration-300 text-slate-700 shadow-sm hover:border-slate-300/80 ${className}`}
+        placeholder={`Enter ${placeholder.toLowerCase()}`}
+      />
+    </div>
   </div>
 );
 
 const FloatingTextarea = ({ name, value, onChange, required = false, placeholder, icon: Icon, rows = 4 }) => (
-  <div className="relative group">
-    <div className="absolute left-4 top-4 text-slate-400 transition-colors group-focus-within:text-violet-500 z-10">
-      <Icon size={18} />
-    </div>
-    <textarea
-      name={name}
-      value={value}
-      onChange={onChange}
-      required={required}
-      rows={rows}
-      className="peer w-full pl-12 pr-4 py-4 bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500/50 transition-all duration-300 placeholder-transparent text-slate-700 shadow-sm hover:border-slate-300/80 resize-none"
-      placeholder=" "
-    />
-    <label className={`absolute left-12 transition-all duration-300 pointer-events-none ${value ? 'top-2 text-xs text-violet-600 font-medium' : 'top-4 text-slate-500 peer-focus:top-2 peer-focus:text-xs peer-focus:text-violet-600 peer-focus:font-medium'}`}>
+  <div className="space-y-2">
+    <label className="block text-sm font-medium text-slate-700 ml-1">
       {placeholder} {required && <span className="text-red-400">*</span>}
     </label>
+    <div className="relative group">
+      <div className="absolute left-4 top-4 text-slate-400 transition-colors group-focus-within:text-violet-500 z-10">
+        <Icon size={18} />
+      </div>
+      <textarea
+        name={name}
+        value={value}
+        onChange={onChange}
+        required={required}
+        rows={rows}
+        className="w-full pl-12 pr-4 py-4 bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500/50 transition-all duration-300 text-slate-700 shadow-sm hover:border-slate-300/80 resize-none"
+        placeholder={`Enter ${placeholder.toLowerCase()}`}
+      />
+    </div>
   </div>
 );
 
 const FloatingSelect = ({ name, value, onChange, required = false, placeholder, icon: Icon, options }) => (
-  <div className="relative group">
-    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-violet-500 z-10">
-      <Icon size={18} />
-    </div>
-    <select
-      name={name}
-      value={value}
-      onChange={onChange}
-      required={required}
-      className="peer w-full pl-12 pr-4 py-4 bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500/50 transition-all duration-300 text-slate-700 shadow-sm hover:border-slate-300/80 appearance-none"
-    >
-      {options.map(option => (
-        <option key={option.value} value={option.value}>{option.label}</option>
-      ))}
-    </select>
-    {/* Only show floating label if placeholder is provided */}
-    {placeholder && (
-      <label className="absolute left-12 top-2 text-xs text-violet-600 font-medium transition-all duration-300 pointer-events-none">
-        {placeholder} {required && <span className="text-red-400">*</span>}
-      </label>
-    )}
-    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-      <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-      </svg>
+  <div className="space-y-2">
+    <label className="block text-sm font-medium text-slate-700 ml-1">
+      {placeholder} {required && <span className="text-red-400">*</span>}
+    </label>
+    <div className="relative group">
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-violet-500 z-10">
+        <Icon size={18} />
+      </div>
+      <select
+        name={name}
+        value={value}
+        onChange={onChange}
+        required={required}
+        className="w-full pl-12 pr-4 py-4 bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500/50 transition-all duration-300 text-slate-700 shadow-sm hover:border-slate-300/80 appearance-none"
+      >
+        {options.map(option => (
+          <option key={option.value} value={option.value}>{option.label}</option>
+        ))}
+      </select>
+      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+        <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </div>
     </div>
   </div>
 );
@@ -145,29 +148,34 @@ const SkillsInput = ({ skills, setSkills }) => {
   const removeSkill = (skill) => setSkills(skills.filter(s => s !== skill));
 
   return (
-    <div className="relative group">
-      <div
-        className="flex flex-wrap items-center min-h-[56px] w-full pl-12 pr-4 py-2 bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl focus-within:ring-2 focus-within:ring-violet-500/20 focus-within:border-violet-500/50 transition-all duration-300 shadow-sm hover:border-slate-300/80 cursor-pointer"
-      >
-        {skills.map(skill => (
-          <span key={skill} className="flex items-center bg-violet-100 text-violet-700 px-3 py-1 mr-2 mb-1 rounded-full text-sm font-medium cursor-pointer">
-            {skill}
-            <button type="button" className="ml-1 p-1 hover:bg-violet-200 rounded-full" onClick={() => removeSkill(skill)}>
-              <LucideX size={14} />
-            </button>
-          </span>
-        ))}
-        <input
-          type="text"
-          value={input}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          className="flex-1 min-w-[120px] bg-transparent border-none outline-none py-2 text-slate-700 placeholder-slate-400 focus:ring-0 focus:outline-none cursor-pointer"
-          placeholder={skills.length === 0 ? 'Add a skill and press Enter' : ''}
-        />
-      </div>
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10 pointer-events-none">
-        <Code size={18} />
+    <div className="space-y-2">
+      <label className="block text-sm font-medium text-slate-700 ml-1">
+        Skills <span className="text-red-400">*</span>
+      </label>
+      <div className="relative group">
+        <div
+          className="flex flex-wrap items-center min-h-[56px] w-full pl-12 pr-4 py-2 bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl focus-within:ring-2 focus-within:ring-violet-500/20 focus-within:border-violet-500/50 transition-all duration-300 shadow-sm hover:border-slate-300/80 cursor-pointer"
+        >
+          {skills.map(skill => (
+            <span key={skill} className="flex items-center bg-violet-100 text-violet-700 px-3 py-1 mr-2 mb-1 rounded-full text-sm font-medium cursor-pointer">
+              {skill}
+              <button type="button" className="ml-1 p-1 hover:bg-violet-200 rounded-full" onClick={() => removeSkill(skill)}>
+                <LucideX size={14} />
+              </button>
+            </span>
+          ))}
+          <input
+            type="text"
+            value={input}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            className="flex-1 min-w-[120px] bg-transparent border-none outline-none py-2 text-slate-700 placeholder-slate-400 focus:ring-0 focus:outline-none cursor-pointer"
+            placeholder={skills.length === 0 ? 'Add a skill and press Enter' : ''}
+          />
+        </div>
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10 pointer-events-none">
+          <Code size={18} />
+        </div>
       </div>
     </div>
   );
@@ -242,7 +250,9 @@ export default function Profile() {
             position: data.position || '',
             yoe: data.yoe || '',
             lookingFor: data.lookingFor || '',
-            organizationName: data.organizationName || '', // <-- add this
+            organizationName: data.organizationName || '',
+            profilePicture: data.profilePicture || '',
+            resumeLink: data.resumeLink || '',
           });
           if (Array.isArray(data.bestWorks) && data.bestWorks.length > 0) {
             const worksWithIds = data.bestWorks.map((bw, index) => ({
@@ -367,6 +377,31 @@ export default function Profile() {
   const handleEditProfile = () => {
     setMode('form');
     setUpdateSuccess(false);
+    // Restore form values from profile when switching to edit mode
+    if (profile) {
+      setForm({
+        ...form,
+        fullName: profile.fullName || '',
+        skills: Array.isArray(profile.skills) ? profile.skills : [],
+        location: profile.location || '',
+        bio: profile.bio || '',
+        role: profile.role || '',
+        portfolio: profile.portfolio || '',
+        github: profile.github || '',
+        userType: profile.userType || '',
+        degree: profile.degree || '',
+        branch: profile.branch || '',
+        year: profile.year || '',
+        companyName: profile.companyName || '',
+        position: profile.position || '',
+        yoe: profile.yoe || '',
+        lookingFor: profile.lookingFor || '',
+        organizationName: profile.organizationName || '',
+        profilePicture: profile.profilePicture || '',
+        resumeLink: profile.resumeLink || '',
+      });
+      setBestWorks(Array.isArray(profile.bestWorks) ? profile.bestWorks : [{ id: 1, description: '', github: '', live: '' }]);
+    }
   };
 
   // Cancel edit handler
@@ -392,7 +427,9 @@ export default function Profile() {
         position: profile.position || '',
         yoe: profile.yoe || '',
         lookingFor: profile.lookingFor || '',
-        organizationName: profile.organizationName || '', // <-- add this
+        organizationName: profile.organizationName || '',
+        profilePicture: profile.profilePicture || '',
+        resumeLink: profile.resumeLink || '',
       });
       setBestWorks(Array.isArray(profile.bestWorks) ? profile.bestWorks : [{ id: 1, description: '', github: '', live: '' }]);
     }
@@ -621,20 +658,14 @@ export default function Profile() {
               <FloatingInput name="fullName" value={form.fullName} onChange={handleChange} placeholder="Full Name" icon={User} required />
               <FloatingInput name="location" value={form.location} onChange={handleChange} placeholder="Location" icon={MapPin} required />
               {/* Skills as tags */}
-              <div>
-                <label className="block text-slate-700 font-medium mb-1 ml-1">Skills <span className="text-red-400">*</span></label>
-                <SkillsInput skills={form.skills || []} setSkills={setSkills} />
-              </div>
-              {/* Your Role label and select */}
-              <div>
-                <label className="block text-slate-700 font-medium mb-1 ml-1">Your Role <span className="text-red-400">*</span></label>
-                <FloatingSelect name="role" value={form.role} onChange={handleChange} icon={Briefcase} required options={[
-                  { value: '', label: 'Select your role' },
-                  { value: 'Founder', label: 'Founder' },
-                  { value: 'Co-Founder', label: 'Co-Founder' },
-                  { value: 'Hustler', label: 'Hustler' },
-                ]} />
-              </div>
+              <SkillsInput skills={form.skills || []} setSkills={setSkills} />
+              {/* Your Role select */}
+              <FloatingSelect name="role" value={form.role} onChange={handleChange} icon={Briefcase} required placeholder="Your Role" options={[
+                { value: '', label: 'Select your role' },
+                { value: 'Founder', label: 'Founder' },
+                { value: 'Co-Founder', label: 'Co-Founder' },
+                { value: 'Hustler', label: 'Hustler' },
+              ]} />
             </div>
             <FloatingTextarea name="bio" value={form.bio} onChange={handleChange} placeholder="Tell us about yourself" icon={FileText} required />
           </div>
@@ -685,15 +716,12 @@ export default function Profile() {
           <div className="space-y-6">
             <h3 className="text-2xl font-semibold text-slate-800 border-b border-slate-200 pb-3">Background Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* You are a label and select */}
-              <div>
-                <label className="block text-slate-700 font-medium mb-1 ml-1">You are a <span className="text-red-400">*</span></label>
-                <FloatingSelect name="userType" value={form.userType} onChange={handleChange} icon={User} required options={[
-                  { value: '', label: 'Select your status' },
-                  { value: 'Student', label: 'Student' },
-                  { value: 'Working Professional', label: 'Working Professional' },
-                ]} />
-              </div>
+              {/* You are a select */}
+              <FloatingSelect name="userType" value={form.userType} onChange={handleChange} icon={User} required placeholder="You are a" options={[
+                { value: '', label: 'Select your status' },
+                { value: 'Student', label: 'Student' },
+                { value: 'Working Professional', label: 'Working Professional' },
+              ]} />
               {form.userType === 'Student' && (
                 <>
                   <FloatingInput name="degree" value={form.degree} onChange={handleChange} placeholder="Degree" icon={GraduationCap} />
@@ -717,7 +745,7 @@ export default function Profile() {
             <FloatingInput name="lookingFor" value={form.lookingFor} onChange={handleChange} placeholder="Co-founder, opportunities, partnerships, etc." icon={Briefcase} />
           </div>
           {/* Submit Button */}
-          <div className="pt-6 flex flex-col md:flex-row gap-4">
+          <div className="pt-6 flex flex-col md:flex-row gap-4 justify-center items-center">
             <button
               type="submit"
               className="w-full md:w-auto bg-gradient-to-r from-violet-600 to-purple-600 text-white font-semibold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-lg cursor-pointer"

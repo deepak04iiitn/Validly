@@ -151,45 +151,93 @@ export default function Home() {
         <div className="absolute bottom-20 left-1/2 w-80 h-80 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-2000"></div>
       </div>
 
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto text-center">
-          <div className="opacity-0 animate-[fadeInUp_1s_ease-out_0.2s_forwards]">
-            <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
-              <span className="inline-block animate-[slideInLeft_1s_ease-out_0.5s_both]">Stop guessing.</span>
+      {/* Enhanced Hero Section */}
+      <section className="relative min-h-screen flex flex-col items-center justify-center">
+        {/* Background Video */}
+        <div className="absolute inset-0 z-0">
+          <video 
+            className="w-full h-full object-cover"
+            autoPlay 
+            loop 
+            muted 
+            playsInline
+            poster="/Validly.png"
+          >
+            <source src="/Validly.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+          {/* Removed gradient overlay for better text readability */}
+        </div>
+        
+        {/* Floating Elements for Visual Interest */}
+        <div className="absolute inset-0 pointer-events-none z-5">
+          <div className="absolute top-20 left-10 w-4 h-4 bg-purple-400 rounded-full animate-ping opacity-75"></div>
+          <div className="absolute top-32 right-20 w-3 h-3 bg-blue-400 rounded-full animate-ping opacity-75" style={{animationDelay: '1s'}}></div>
+          <div className="absolute bottom-32 left-20 w-2 h-2 bg-pink-400 rounded-full animate-ping opacity-75" style={{animationDelay: '2s'}}></div>
+          <div className="absolute top-1/2 right-10 w-6 h-6 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full animate-bounce opacity-60"></div>
+        </div>
+        
+        {/* Hero Content */}
+        <div className="mt-26 relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pb-32">
+          <div className="text-center">
+            
+            {/* Enhanced Main Heading */}
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-8 leading-tight">
+              <span className="inline-block animate-[slideInLeft_1s_ease-out_0.5s_both] drop-shadow-[0_8px_32px_rgba(0,0,0,0.8)]">
+                Stop guessing.
+              </span>
               <br />
-              <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent inline-block animate-[slideInRight_1s_ease-out_0.7s_both]">
+              <span className="bg-gradient-to-r from-purple-300 via-blue-300 to-pink-300 bg-clip-text text-transparent inline-block animate-[slideInRight_1s_ease-out_0.7s_both] drop-shadow-[0_8px_32px_rgba(0,0,0,0.8)]">
                 Start validating.
               </span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed opacity-0 animate-[fadeInUp_1s_ease-out_0.9s_forwards]">
-              Test your startup ideas before you build. Connect with validators, collaborators, and mentors in a safe, structured environment.
+            
+            {/* Enhanced Subtitle */}
+            <p className="text-xl md:text-2xl lg:text-3xl text-white/95 mb-10 leading-relaxed opacity-0 animate-[fadeInUp_1s_ease-out_0.9s_forwards] max-w-5xl mx-auto font-semibold drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
+              Test your startup ideas before you build. Connect with validators, collaborators, mentors in a safe, structured environment and much more...
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 opacity-0 animate-[fadeInUp_1s_ease-out_1.1s_forwards]">
-              <button className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:shadow-xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-1 flex items-center group relative overflow-hidden cursor-pointer">
-                <span className="relative z-10">Start Validating Free</span>
-                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300 relative z-10" />
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-700 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            
+            {/* Enhanced CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-6 mb-16 opacity-0 animate-[fadeInUp_1s_ease-out_1.1s_forwards] justify-center">
+              <button className="group relative bg-gradient-to-r from-purple-600 via-blue-600 to-purple-700 text-white px-10 py-5 rounded-2xl text-xl font-bold shadow-2xl hover:shadow-[0_20px_40px_rgba(147,51,234,0.4)] transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 flex items-center justify-center overflow-hidden cursor-pointer">
+                <span className="relative z-10 flex items-center">
+                  Start Validating Free
+                  <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-2 transition-transform duration-300" />
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-700 via-blue-700 to-purple-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-blue-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </button>
-              <button className="flex items-center text-gray-700 hover:text-purple-600 transition-all duration-300 font-semibold group cursor-pointer">
-                <Play className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform duration-300" />
+              
+              <button className="group flex items-center justify-center text-white hover:text-purple-200 transition-all duration-300 font-bold text-lg cursor-pointer bg-white/10 backdrop-blur-md border border-white/20 px-8 py-5 rounded-2xl hover:bg-white/20 hover:border-white/30 shadow-xl hover:shadow-2xl transform hover:scale-105">
+                <Play className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" />
                 Watch Demo
               </button>
             </div>
-            <div className="flex justify-center items-center space-x-8 text-sm text-gray-500 opacity-0 animate-[fadeInUp_1s_ease-out_1.3s_forwards]">
+            
+            {/* Enhanced Features List (with emoji icons and glassmorphism) */}
+            <div className="flex flex-col sm:flex-row gap-6 sm:gap-10 text-lg text-white justify-center items-center mt-6 mb-6 opacity-0 animate-[fadeInUp_1s_ease-out_1.3s_forwards]">
               {[
-                { text: "Free to start", delay: "0s" },
-                { text: "No credit card required", delay: "0.1s" },
-                { text: "Safe & secure", delay: "0.2s" }
+                { text: "Free to start", icon: "🚀" },
+                { text: "No credit card required", icon: "💳" },
+                { text: "Safe & secure", icon: "🔒" }
               ].map((item, index) => (
-                <div key={index} className={`flex items-center animate-[bounceIn_0.8s_ease-out_${1.5 + index * 0.1}s_both]`}>
-                  <CheckCircle className="w-4 h-4 mr-1 text-green-500" />
-                  {item.text}
+                <div key={index} className="flex items-center font-bold gap-2 px-2 py-1">
+                  <span className="text-2xl mr-2">{item.icon}</span>
+                  <span className="font-semibold text-lg">{item.text}</span>
                 </div>
               ))}
             </div>
+            
           </div>
         </div>
+        
+      {/* Enhanced Scroll Indicator - always at the bottom of the hero section */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 pointer-events-none opacity-0 animate-[fadeInUp_1s_ease-out_1.5s_forwards]">
+        <div className="w-8 h-12 border-2 border-white/60 rounded-full flex justify-center backdrop-blur-sm bg-white/10 animate-bounce">
+          <div className="w-1 h-4 bg-white/80 rounded-full mt-2 animate-pulse"></div>
+        </div>
+        <p className="text-white/80 text-xs mt-2 font-semibold drop-shadow">Scroll to explore</p>
+      </div>
       </section>
 
       {/* Features Section */}
