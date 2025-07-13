@@ -34,6 +34,21 @@ export default function SignIn() {
       }
       
       if(res.ok) {
+        // Store token and expiry in localStorage
+        if (data.token && data.expiresAt) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('tokenExpiry', data.expiresAt);
+          // Schedule auto-logout
+          const timeLeft = Number(data.expiresAt) - Date.now();
+          if (timeLeft > 0) {
+            setTimeout(() => {
+              localStorage.removeItem('token');
+              localStorage.removeItem('tokenExpiry');
+              dispatch(signInFailure('Session expired. Please sign in again.'));
+              navigate('/sign-in');
+            }, timeLeft);
+          }
+        }
         dispatch(signInSuccess(data));
         navigate('/');
       }

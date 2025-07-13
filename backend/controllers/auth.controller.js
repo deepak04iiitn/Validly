@@ -53,21 +53,23 @@ export const signin = async (req, res, next) => {
             return next(errorHandler(400, 'Invalid credentials!'));
         }
 
+        const expiresInSeconds = 60 * 60; // 1 hour
         const token = jwt.sign(
             { 
                 id: validUser._id,
                 isUserAdmin: validUser.isUserAdmin  // Include isUserAdmin in the token
             },
-            process.env.JWT_SECRET
+            process.env.JWT_SECRET,
+            { expiresIn: expiresInSeconds } // Set token expiry to 1 hour
         );
-
+        const expiresAt = Date.now() + expiresInSeconds * 1000;
         const { password: pass, ...rest } = validUser._doc;
 
         res.status(200)
            .cookie('access_token', token, {
                 httpOnly: true
            })
-           .json(rest);
+           .json({ ...rest, token, expiresAt });
 
     } catch (error) {
         next(error);
@@ -82,21 +84,23 @@ export const google = async(req, res, next) => {
         const user = await User.findOne({ email });
 
         if (user) {
+            const expiresInSeconds = 60 * 60; // 1 hour
             const token = jwt.sign(
                 {
                     id: user._id,
                     isUserAdmin: user.isUserAdmin  // Include isUserAdmin in the token
                 },
-                process.env.JWT_SECRET
+                process.env.JWT_SECRET,
+                { expiresIn: expiresInSeconds } // Set token expiry to 1 hour
             );
-
+            const expiresAt = Date.now() + expiresInSeconds * 1000;
             const { password, ...rest } = user._doc;
 
             res.status(200)
                .cookie('access_token', token, {
                     httpOnly: true
                })
-               .json(rest);
+               .json({ ...rest, token, expiresAt });
         } else {
             const generatedPassword = Math.random().toString(36).slice(-8) + 
                                     Math.random().toString(36).slice(-8);
@@ -113,21 +117,23 @@ export const google = async(req, res, next) => {
 
             await newUser.save();
 
+            const expiresInSeconds = 60 * 60; // 1 hour
             const token = jwt.sign(
                 {
                     id: newUser._id,
                     isUserAdmin: newUser.isUserAdmin  // Include isUserAdmin in the token
                 },
-                process.env.JWT_SECRET
+                process.env.JWT_SECRET,
+                { expiresIn: expiresInSeconds } // Set token expiry to 1 hour
             );
-
+            const expiresAt = Date.now() + expiresInSeconds * 1000;
             const { password, ...rest } = newUser._doc;
 
             res.status(200)
                .cookie('access_token', token, {
                     httpOnly: true
                })
-               .json(rest);
+               .json({ ...rest, token, expiresAt });
         }
     } catch (error) {
         next(error);

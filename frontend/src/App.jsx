@@ -7,10 +7,34 @@ import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Profile from './pages/Profile';
 import Ideas from './pages/Ideas';
-import Progress from './pages/Progress';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { signoutSuccess, signInSuccess } from './redux/user/userSlice';
 
 
 export default function App() {
+  const dispatch = useDispatch();
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const expiry = localStorage.getItem('tokenExpiry');
+    if (token && expiry) {
+      const timeLeft = Number(expiry) - Date.now();
+      if (timeLeft > 0) {
+        // Optionally, fetch user profile here and dispatch signInSuccess
+        setTimeout(() => {
+          localStorage.removeItem('token');
+          localStorage.removeItem('tokenExpiry');
+          dispatch(signoutSuccess());
+        }, timeLeft);
+      } else {
+        localStorage.removeItem('token');
+        localStorage.removeItem('tokenExpiry');
+        dispatch(signoutSuccess());
+      }
+    } else {
+      dispatch(signoutSuccess());
+    }
+  }, [dispatch]);
   return (
     <BrowserRouter>
       <div className="flex flex-col min-h-screen">
@@ -22,7 +46,6 @@ export default function App() {
             <Route path='/sign-up' element={<SignUp />} />
             <Route path='/profile' element={<Profile />} />
             <Route path='/ideas' element={<Ideas />} />
-            <Route path='/progress' element={<Progress />} />
           </Routes>
         </div>
         <Footer />

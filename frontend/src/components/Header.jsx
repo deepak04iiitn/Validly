@@ -53,11 +53,11 @@ export default function Header() {
     },
     Collaborate: {
       title: 'Collaborate',
-      desc: 'Find co-founders, team up for hackathons, or join projects that match your skills and interests.',
+      desc: 'Find co-founders, team up for hackathons, or join projects that match your skills and interests. Build your team and work together on exciting projects.',
       actions: [
         'Find collaborators & co-founders',
         'Join hackathon squads',
-        'Post or apply for roles',
+        'Work on open-source startup projects',
       ],
     },
     Mentorship: {
@@ -78,13 +78,14 @@ export default function Header() {
         'Participate in discussions',
       ],
     },
-    Progress: {
-      title: 'Progress',
-      desc: 'Track your startup milestones, validation checkpoints, and team progress in one place.',
+    Hiring: {
+      title: 'Hiring',
+      desc: 'Post jobs, gigs, or small help requests for your startup. Find talent for short-term tasks, freelance work, or long-term roles. Apply to work with other founders and startups.',
       actions: [
-        'View your roadmap',
-        'Set milestones & tasks',
-        'Track validation & feedback',
+        'Post a job, gig, or help request',
+        'Browse available opportunities',
+        'Apply for startup work',
+        'Connect with founders needing help',
       ],
     },
   };
@@ -112,7 +113,7 @@ export default function Header() {
     Collaborate: '/collaborate',
     Mentorship: '/mentorship',
     Communities: '/communities',
-    Progress: '/progress',
+    Hiring: '/hiring',
     Promote: '/promote',
   };
 
