@@ -1,6 +1,6 @@
 import React from 'react';
 
-function AddCommentForm({ onAdd }) {
+function AddCommentFormMy({ onAdd }) {
   const [text, setText] = React.useState('');
   const [isFocused, setIsFocused] = React.useState(false);
   return (
@@ -75,4 +75,4 @@ function AddCommentForm({ onAdd }) {
   );
 }
 
-export default AddCommentForm; 
+export default AddCommentFormMy; 

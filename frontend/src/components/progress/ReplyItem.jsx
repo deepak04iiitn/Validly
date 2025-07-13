@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, ThumbsUp, ThumbsDown, AlertTriangle } from 'lucide-react';
 
-function ReplyItem({ reply, ideaId, commentId, user, onEdit, onLike, onDislike, onDelete }) {
+function ReplyItemMy({ reply, ideaId, commentId, user, onEdit, onLike, onDislike, onDelete }) {
   const [editing, setEditing] = React.useState(false);
   const [editText, setEditText] = React.useState(reply.text);
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
@@ -150,4 +150,4 @@ function ReplyItem({ reply, ideaId, commentId, user, onEdit, onLike, onDislike, 
   );
 }
 
-export default ReplyItem; 
+export default ReplyItemMy; 

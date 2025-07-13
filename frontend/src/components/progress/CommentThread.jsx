@@ -1,8 +1,8 @@
 import React from 'react';
 import { X, ThumbsUp, ThumbsDown, AlertTriangle } from 'lucide-react';
-import ReplyItem from './ReplyItem';
+import ReplyItemMy from './ReplyItem';
 
-function CommentThread({ comment, ideaId, user, onEdit, onLike, onDislike, onReply, onEditReply, onLikeReply, onDislikeReply, onDelete, onDeleteReply }) {
+function CommentThreadMy({ comment, ideaId, user, onEdit, onLike, onDislike, onReply, onEditReply, onLikeReply, onDislikeReply, onDelete, onDeleteReply }) {
   const [editing, setEditing] = React.useState(false);
   const [editText, setEditText] = React.useState(comment.text);
   const [replying, setReplying] = React.useState(false);
@@ -183,7 +183,7 @@ function CommentThread({ comment, ideaId, user, onEdit, onLike, onDislike, onRep
       {comment.replies && comment.replies.length > 0 && isExpanded && (
         <div className="ml-12 mt-4 space-y-3">
           {comment.replies.map(reply => (
-            <ReplyItem
+            <ReplyItemMy
               key={reply.replyId}
               reply={reply}
               ideaId={ideaId}
@@ -239,4 +239,4 @@ function CommentThread({ comment, ideaId, user, onEdit, onLike, onDislike, onRep
   );
 }
 
-export default CommentThread; 
+export default CommentThreadMy; 

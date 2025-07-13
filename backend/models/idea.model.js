@@ -40,7 +40,12 @@ const commentSchema = new mongoose.Schema({
 const ideaSchema = new mongoose.Schema({
   problem: { type: String, required: true },
   solution: { type: String, required: true },
-  stage: { type: String, required: true },
+  stage: { 
+    type: String, 
+    required: true,
+    enum: ['Concept', 'Prototype', 'MVP', 'Beta', 'Production'],
+    default: 'Concept'
+  },
   link: { type: String },
   autoDeleteAfterDays: { type: Number },
   likes: { type: [String], default: [] },

@@ -12,6 +12,12 @@ export const createIdea = async (req, res, next) => {
     if (!problem || !solution || !stage) {
       return next(errorHandler(400, 'Problem, Solution, and Stage are required.'));
     }
+    
+    // Validate stage
+    const validStages = ['Concept', 'Prototype', 'MVP', 'Beta', 'Production'];
+    if (!validStages.includes(stage)) {
+      return next(errorHandler(400, 'Invalid stage. Must be one of: Concept, Prototype, MVP, Beta, Production'));
+    }
     // Ensure pollId/optionId
     let processedPolls = [];
     if (Array.isArray(polls)) {
@@ -59,6 +65,22 @@ export const getUserIdeas = async (req, res, next) => {
   }
 };
 
+// Get valid development stages
+export const getValidStages = async (req, res, next) => {
+  try {
+    const validStages = [
+      { value: 'Concept', label: 'Concept', color: 'from-blue-100 to-indigo-100' },
+      { value: 'Prototype', label: 'Prototype', color: 'from-yellow-100 to-orange-100' },
+      { value: 'MVP', label: 'MVP', color: 'from-green-100 to-emerald-100' },
+      { value: 'Beta', label: 'Beta', color: 'from-purple-100 to-violet-100' },
+      { value: 'Production', label: 'Production', color: 'from-red-100 to-pink-100' }
+    ];
+    res.status(200).json(validStages);
+  } catch (err) {
+    next(err);
+  }
+};
+
 // Update an idea (only owner)
 export const updateIdea = async (req, res, next) => {
   try {
@@ -68,7 +90,14 @@ export const updateIdea = async (req, res, next) => {
     const { problem, solution, stage, link, autoDeleteAfterDays, polls } = req.body;
     if (problem !== undefined) idea.problem = problem;
     if (solution !== undefined) idea.solution = solution;
-    if (stage !== undefined) idea.stage = stage;
+    if (stage !== undefined) {
+      // Validate stage
+      const validStages = ['Concept', 'Prototype', 'MVP', 'Beta', 'Production'];
+      if (!validStages.includes(stage)) {
+        return next(errorHandler(400, 'Invalid stage. Must be one of: Concept, Prototype, MVP, Beta, Production'));
+      }
+      idea.stage = stage;
+    }
     if (link !== undefined) idea.link = link;
     if (autoDeleteAfterDays !== undefined) idea.autoDeleteAfterDays = autoDeleteAfterDays;
     if (polls !== undefined) {

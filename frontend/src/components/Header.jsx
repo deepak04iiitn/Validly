@@ -117,10 +117,8 @@ export default function Header() {
   };
 
   return (
-    <header className={`fixed w-full top-0 z-50 transition-all duration-300 ${
-      isScrolled ? 'bg-white/95 backdrop-blur-lg shadow-lg' : 'bg-transparent'
-    }`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header className={`fixed w-full top-0 z-50 transition-all duration-300 bg-white/80 backdrop-blur-lg shadow-lg border-b border-purple-100`}>
+      <div className="max-w-7xl mx-auto pl-0 pr-6 sm:pr-10 lg:pr-16">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <a href="/" className="flex items-center cursor-pointer">
@@ -132,7 +130,7 @@ export default function Header() {
           </a>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8 relative z-20">
+          <nav className="hidden md:flex items-center space-x-10 relative z-20 text-lg font-semibold">
             {Object.keys(allDropdowns).map((key) => (
               <div
                 key={key}
@@ -144,12 +142,13 @@ export default function Header() {
                 <button
                   type="button"
                   onClick={() => navigate(navRoutes[key])}
-                  className={`text-gray-700 hover:text-purple-600 transition-colors font-medium px-2 py-1 rounded cursor-pointer focus:outline-none focus:text-purple-700 ${key === 'Promote' ? 'font-bold text-blue-700' : ''}`}
+                  className={`group px-3 py-1 rounded transition-colors font-semibold focus:outline-none focus:text-purple-700 relative text-gray-700 hover:text-purple-600 cursor-pointer`}
                   aria-haspopup="true"
                   aria-expanded={hoveredNav === key}
                   style={{ background: 'none', border: 'none' }}
                 >
                   {key}
+                  <span className="absolute left-0 -bottom-1 w-full h-0.5 bg-gradient-to-r from-purple-400 to-blue-400 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300 rounded-full" />
                 </button>
                 {/* Dropdown */}
                 {hoveredNav === key && (
@@ -157,6 +156,7 @@ export default function Header() {
                     className="fixed left-1/2 top-20 z-40 -translate-x-1/2 mt-0 w-full max-w-6xl bg-white rounded-2xl shadow-2xl border border-purple-100 px-12 py-8 transition-all duration-300 animate-fadeInDropdown flex flex-col items-start"
                     style={{ minWidth: '320px' }}
                   >
+                    <div className="h-1 w-full rounded-t-2xl bg-gradient-to-r from-purple-500 via-pink-400 to-blue-400 mb-4" />
                     <div className="mb-2 text-2xl font-bold text-purple-700 flex items-center gap-3">
                       {key === 'Promote' ? <Zap className="w-6 h-6 text-blue-500" /> : <Lightbulb className="w-6 h-6 text-yellow-400" />}
                       {allDropdowns[key].title}
@@ -190,7 +190,7 @@ export default function Header() {
             {user ? (
               <div className="relative" ref={dropdownRef}>
                 <button
-                  className="flex items-center gap-3 px-3 py-2 rounded-full bg-white/70 shadow-md hover:shadow-lg border border-purple-100 hover:border-purple-300 transition-all duration-200 cursor-pointer focus:outline-none"
+                  className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/90 shadow-lg hover:shadow-xl border border-purple-100 hover:border-purple-300 transition-all duration-200 cursor-pointer focus:outline-none"
                   onClick={() => setDropdownOpen(v => !v)}
                   aria-haspopup="true"
                   aria-expanded={dropdownOpen}
@@ -208,9 +208,9 @@ export default function Header() {
                   <svg className={`w-4 h-4 ml-1 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
                 </button>
                 {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-purple-100 py-4 z-50 animate-fadeInDropdown flex flex-col items-stretch" style={{boxShadow: '0 8px 32px 0 rgba(80,0,200,0.10)'}}>
+                  <div className="absolute right-0 mt-2 w-64 bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-purple-100 py-5 z-50 animate-fadeInDropdown flex flex-col items-stretch" style={{boxShadow: '0 8px 32px 0 rgba(80,0,200,0.10)'}}>
                     {/* Gradient accent bar */}
-                    <div className="h-1 w-full rounded-t-3xl bg-gradient-to-r from-purple-500 via-pink-400 to-blue-400 mb-3" />
+                    <div className="h-1 w-full rounded-t-3xl bg-gradient-to-r from-purple-500 via-pink-400 to-blue-400 mb-4" />
                     {/* User info */}
                     <div className="flex items-center gap-3 px-5 pb-3">
                       {user.profilePicture ? (
@@ -293,11 +293,11 @@ export default function Header() {
         />
         {/* Sidebar - starts below header, glassmorphism, scrollable */}
         <aside
-          className={`fixed top-0 right-0 z-[110] h-screen w-80 max-w-full bg-white/70 backdrop-blur-xl shadow-2xl border-l border-purple-100 transform transition-transform duration-300 ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'} flex flex-col`}
+          className={`fixed top-0 right-0 z-[110] h-screen w-80 max-w-full bg-white/95 backdrop-blur-xl shadow-2xl border-l border-purple-100 transform transition-transform duration-300 ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'} flex flex-col rounded-l-3xl`}
           style={{ transitionProperty: 'transform, box-shadow' }}
           aria-hidden={!isMenuOpen}
         >
-          <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 sticky top-0 bg-white/80 backdrop-blur-xl z-10">
+          <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 sticky top-0 bg-white/90 backdrop-blur-xl z-10 rounded-tl-3xl">
             <a href="/" className="flex items-center cursor-pointer">
               <img src="/Validly.png" alt="Validly Logo" className="w-20 h-12 object-contain" />
             </a>
@@ -306,7 +306,7 @@ export default function Header() {
               className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
               aria-label="Close menu"
             >
-              <X className="w-6 h-6" />
+              <X className="w-7 h-7" />
             </button>
           </div>
           <nav className="flex-1 flex flex-col gap-2 px-6 py-8 overflow-y-auto">
@@ -339,13 +339,13 @@ export default function Header() {
                 </div>
                 <a
                   href="/profile"
-                  className="w-full py-3 rounded-xl bg-white/90 text-gray-800 font-semibold shadow-md hover:bg-purple-50 hover:text-purple-700 transition-colors duration-200 cursor-pointer text-center mb-2"
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold shadow-lg border border-purple-300 hover:from-purple-600 hover:to-blue-600 transition-colors duration-200 cursor-pointer text-center mb-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Profile
                 </a>
                 <button
-                  className="w-full py-3 rounded-xl bg-white/90 text-gray-800 font-semibold shadow-md hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200 cursor-pointer text-center"
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold shadow-lg border border-pink-300 hover:from-pink-600 hover:to-purple-600 transition-colors duration-200 cursor-pointer text-center"
                   onClick={async () => {
                     setSigningOut(true);
                     try {

@@ -1,5 +1,5 @@
 import express from 'express';
-import { createIdea, getAllIdeas, getUserIdeas, updateIdea, deleteIdea, likeIdea, dislikeIdea, addPoll, votePoll, addComment, editComment, likeComment, dislikeComment, addReply, editReply, likeReply, dislikeReply, deleteComment, deleteReply, exportIdeaPDF } from '../controllers/idea.controller.js';
+import { createIdea, getAllIdeas, getUserIdeas, getValidStages, updateIdea, deleteIdea, likeIdea, dislikeIdea, addPoll, votePoll, addComment, editComment, likeComment, dislikeComment, addReply, editReply, likeReply, dislikeReply, deleteComment, deleteReply, exportIdeaPDF } from '../controllers/idea.controller.js';
 import { verifyUser } from '../utils/verifyUser.js';
 
 const router = express.Router();
@@ -8,6 +8,7 @@ const router = express.Router();
 router.post('/', verifyUser, createIdea);
 router.get('/', getAllIdeas);
 router.get('/mine', verifyUser, getUserIdeas);
+router.get('/stages', getValidStages);
 router.put('/:id', verifyUser, updateIdea);
 router.delete('/:id', verifyUser, deleteIdea);
 
