@@ -1,5 +1,5 @@
 import express from 'express';
-import { signup, signin, google, logout, getProfile, updateProfile, deleteAccount, forgotPassword, resetPassword } from '../controllers/auth.controller.js';
+import { signup, signin, google, logout, getProfile, updateProfile, deleteAccount, getSecurityQuestion, resetPasswordWithSecurityAnswer } from '../controllers/auth.controller.js';
 import { verifyUser } from '../utils/verifyUser.js';
 import multer from 'multer';
 
@@ -11,8 +11,8 @@ router.post('/signup' , signup);
 router.post('/signin' , signin);
 router.post('/google' , google);
 router.post('/logout', logout);
-router.post('/forgot-password', forgotPassword);
-router.post('/reset-password', resetPassword);
+router.post('/security-question', getSecurityQuestion);
+router.post('/reset-password', resetPasswordWithSecurityAnswer);
 router.get('/profile', verifyUser, getProfile);
 router.put('/profile', verifyUser, upload.single('resume'), updateProfile);
 router.delete('/profile', verifyUser, deleteAccount);

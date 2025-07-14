@@ -31,6 +31,7 @@ export default function SignIn() {
       const data = await res.json();
       if(data.success === false) {
         dispatch(signInFailure(data.message));
+        return;
       }
       
       if(res.ok) {
@@ -62,7 +63,7 @@ export default function SignIn() {
       {/* Animated Gradient Blobs */}
       <div className="absolute top-0 left-0 w-80 h-80 bg-gradient-to-br from-purple-400 to-pink-400 opacity-30 rounded-full blur-3xl animate-pulse -z-10" />
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tr from-pink-300 to-purple-300 opacity-20 rounded-full blur-3xl animate-pulse delay-1000 -z-10" />
-      <div className="w-full max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-center gap-8 px-4 py-12">
+      <div className="w-full max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-center gap-8 px-4 py-12 mt-16">
         {/* Left: Branding/Hero */}
         <div className="md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left space-y-6">
           <Link to="/" className="flex justify-center md:justify-start w-full cursor-pointer">
@@ -106,6 +107,15 @@ export default function SignIn() {
         <div className="md:w-1/2 w-full flex justify-center">
           <div className="w-full max-w-md bg-white/60 backdrop-blur-lg rounded-3xl shadow-2xl p-8 md:p-10 border border-white/40 relative">
             <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Sign In to Your Account</h2>
+            {/* Error Message - moved above the form and enhanced */}
+            {errorMessage && (
+              <div className="mb-4 flex items-center justify-center bg-red-100/90 text-red-700 p-3 rounded-lg text-sm shadow-md animate-fade-in">
+                <svg className="w-5 h-5 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M21 12A9 9 0 113 12a9 9 0 0118 0z" />
+                </svg>
+                {errorMessage}
+              </div>
+            )}
             <form className="space-y-6" onSubmit={handleSubmit} autoComplete="off">
               {/* Email Field */}
               <div className="relative">
@@ -160,10 +170,8 @@ export default function SignIn() {
                 </span>
               </div>
               {/* Forgot Password Link */}
-              <div className="flex justify-end -mt-4 mb-2">
-                <Link to="/forgot-password" className="text-sm text-purple-600 hover:text-pink-500 font-semibold transition-colors cursor-pointer">
-                  Forgot Password?
-                </Link>
+              <div className="flex justify-end mb-2">
+                <Link to="/forgot-password" className="text-sm text-purple-600 hover:text-pink-500 font-semibold transition-colors cursor-pointer">Forgot Password?</Link>
               </div>
               {/* Submit Button */}
               <button
@@ -193,11 +201,6 @@ export default function SignIn() {
               <OAuth />
             </form>
             {/* Error Message */}
-            {errorMessage && (
-              <div className="mt-6 bg-red-100/80 text-red-700 p-3 rounded-lg text-sm text-center shadow-md animate-fade-in">
-                {errorMessage}
-              </div>
-            )}
             {/* Sign Up Link */}
             <p className="mt-8 text-center text-sm text-gray-700">
               Don&apos;t have an account?{' '}

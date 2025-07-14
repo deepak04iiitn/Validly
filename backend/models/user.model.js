@@ -106,13 +106,13 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    resetPasswordToken: {
+    securityQuestion: {
         type: String,
-        default: null,
+        required: true,
     },
-    resetPasswordExpires: {
-        type: Date,
-        default: null,
+    securityAnswerHash: {
+        type: String,
+        required: true,
     },
 } , {timestamps : true})
 
