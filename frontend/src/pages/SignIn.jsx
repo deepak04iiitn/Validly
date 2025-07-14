@@ -159,6 +159,12 @@ export default function SignIn() {
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 11c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm0 0v2m0 4h.01" /></svg>
                 </span>
               </div>
+              {/* Forgot Password Link */}
+              <div className="flex justify-end -mt-4 mb-2">
+                <Link to="/forgot-password" className="text-sm text-purple-600 hover:text-pink-500 font-semibold transition-colors cursor-pointer">
+                  Forgot Password?
+                </Link>
+              </div>
               {/* Submit Button */}
               <button
                 type="submit"

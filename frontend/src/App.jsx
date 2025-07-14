@@ -7,6 +7,8 @@ import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Profile from './pages/Profile';
 import Ideas from './pages/Ideas';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { signoutSuccess, signInSuccess } from './redux/user/userSlice';
@@ -46,6 +48,8 @@ export default function App() {
             <Route path='/sign-up' element={<SignUp />} />
             <Route path='/profile' element={<Profile />} />
             <Route path='/ideas' element={<Ideas />} />
+            <Route path='/forgot-password' element={<ForgotPassword />} />
+            <Route path='/reset-password' element={<ResetPassword />} />
           </Routes>
         </div>
         <Footer />
