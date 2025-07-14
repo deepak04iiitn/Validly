@@ -235,7 +235,7 @@ export const forgotPassword = async (req, res) => {
       },
     });
 
-    const resetUrl = `${req.protocol}://${req.get('host')}/reset-password?token=${token}`;
+    const resetUrl = `${process.env.CLIENT_URL}/reset-password?token=${token}`;
     const mailOptions = {
       to: user.email,
       from: process.env.EMAIL_USER,
@@ -250,7 +250,7 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
-// POST /api/auth/reset-password
+
 export const resetPassword = async (req, res) => {
   const { token, password } = req.body;
   try {
