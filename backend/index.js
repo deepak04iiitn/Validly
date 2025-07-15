@@ -42,6 +42,12 @@ app.use('/backend/ideas', ideaRoutes);
 app.use('/uploads/resumes', express.static(path.resolve('uploads/resumes')));
 
 
+// Ping endpoint to keep backend awake
+app.get('/backend/ping', (req, res) => {
+  res.status(200).send('pong');
+});
+
+
 app.use(express.static(path.join(__dirname, 'frontend/dist')));
 
 // Handle frontend routes - only catch routes that don't start with /backend
