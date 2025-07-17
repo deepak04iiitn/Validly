@@ -154,21 +154,7 @@ export default function Home() {
       {/* Enhanced Hero Section */}
       <section className="relative min-h-screen flex flex-col items-center justify-center">
         {/* Background Video - Hidden on mobile */}
-        <div className="absolute inset-0 z-0 hidden md:block">
-          <video 
-            className="w-full h-full object-cover"
-            autoPlay 
-            loop 
-            muted 
-            playsInline
-            poster="/Validly.png"
-          >
-            <source src="/Validly.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-          {/* Video dimming overlay */}
-          <div className="absolute inset-0 bg-black/30"></div>
-        </div>
+        {/* Removed video background for all devices */}
         
         {/* Mobile Background - Subtle gradient with elegant bubbles for smaller devices */}
         <div className="absolute inset-0 z-0 md:hidden bg-gradient-to-br from-purple-50 via-white to-blue-50 overflow-hidden">
@@ -193,18 +179,18 @@ export default function Home() {
           <div className="text-center">
             
             {/* Enhanced Main Heading */}
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-gray-900 md:text-white mb-8 leading-tight">
-              <span className="inline-block animate-[slideInLeft_1s_ease-out_0.5s_both] md:drop-shadow-[0_8px_32px_rgba(0,0,0,0.8)]">
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-gray-900 mb-8 leading-tight">
+              <span className="inline-block animate-[slideInLeft_1s_ease-out_0.5s_both]">
                 Stop guessing.
               </span>
               <br />
-              <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-pink-600 md:from-purple-300 md:via-blue-300 md:to-pink-300 bg-clip-text text-transparent inline-block animate-[slideInRight_1s_ease-out_0.7s_both] md:drop-shadow-[0_8px_32px_rgba(0,0,0,0.8)]">
+              <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-pink-600 bg-clip-text text-transparent inline-block animate-[slideInRight_1s_ease-out_0.7s_both]">
                 Start validating.
               </span>
             </h1>
             
             {/* Enhanced Subtitle */}
-            <p className="text-xl md:text-2xl lg:text-3xl text-gray-700 md:text-white/95 mb-10 leading-relaxed opacity-0 animate-[fadeInUp_1s_ease-out_0.9s_forwards] max-w-5xl mx-auto font-semibold md:drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
+            <p className="text-xl md:text-2xl lg:text-3xl text-gray-700 mb-10 leading-relaxed opacity-0 animate-[fadeInUp_1s_ease-out_0.9s_forwards] max-w-5xl mx-auto font-semibold">
               Test your startup ideas before you build. Connect with validators, collaborators, mentors in a safe, structured environment and much more...
             </p>
             
@@ -219,15 +205,15 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-blue-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </button>
               
-              <button className="group flex items-center justify-center text-gray-700 md:text-white hover:text-purple-600 md:hover:text-purple-200 transition-all duration-300 font-bold text-lg cursor-pointer bg-gray-100 md:bg-white/10 backdrop-blur-md border border-gray-300 md:border-white/20 px-8 py-5 rounded-2xl hover:bg-gray-200 md:hover:bg-white/20 hover:border-gray-400 md:hover:border-white/30 shadow-xl hover:shadow-2xl transform hover:scale-105">
+              <button className="group flex items-center justify-center text-gray-700 hover:text-purple-600 transition-all duration-300 font-bold text-lg cursor-pointer bg-gray-100 backdrop-blur-md border border-gray-300 px-8 py-5 rounded-2xl hover:bg-gray-200 hover:border-gray-400 shadow-xl hover:shadow-2xl transform hover:scale-105">
                 <Play className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" />
                 Watch Demo
               </button>
             </div>
             
             {/* Enhanced Features List (with emoji icons and glassmorphism) */}
-            <div className="flex flex-col sm:flex-row gap-6 sm:gap-10 text-lg text-gray-700 md:text-white justify-center items-center mt-6 mb-6 opacity-0 animate-[fadeInUp_1s_ease-out_1.3s_forwards]">
-              {[
+            <div className="flex flex-col sm:flex-row gap-6 sm:gap-10 text-lg text-gray-700 justify-center items-center mt-6 mb-6 opacity-0 animate-[fadeInUp_1s_ease-out_1.3s_forwards]">
+              {[ 
                 { text: "Free to start", icon: "🚀" },
                 { text: "No credit card required", icon: "💳" },
                 { text: "Safe & secure", icon: "🔒" }

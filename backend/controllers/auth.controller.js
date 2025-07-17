@@ -242,3 +242,12 @@ export const deleteAccount = async (req, res, next) => {
     next(err);
   }
 };
+
+export const getAllUsers = async (req, res, next) => {
+  try {
+    const users = await User.find({}, '-password');
+    res.status(200).json(users);
+  } catch (err) {
+    next(err);
+  }
+};

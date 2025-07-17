@@ -11,6 +11,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { signoutSuccess, signInSuccess } from './redux/user/userSlice';
+import Collaborate from './pages/Collaborate';
 
 
 export default function App() {
@@ -48,6 +49,7 @@ export default function App() {
             <Route path='/profile' element={<Profile />} />
             <Route path='/ideas' element={<Ideas />} />
             <Route path='/forgot-password' element={<ForgotPassword />} />
+            <Route path='/collaborate' element={<Collaborate />} />
           </Routes>
         </div>
         <Footer />

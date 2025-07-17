@@ -134,6 +134,9 @@ export default function Ideas() {
   const [loadingMoreComments, setLoadingMoreComments] = useState({});
   const COMMENTS_PER_PAGE = 5;
 
+  // Add after other useState hooks
+  const [visibleIdeasCount, setVisibleIdeasCount] = useState(10);
+
   // If user is not signed in, show a beautiful warning
   if (!user) {
     return (
@@ -194,6 +197,7 @@ export default function Ideas() {
     fetchUserIdeas();
     // Reset comment pages when fetching new ideas
     resetCommentPages();
+    setVisibleIdeasCount(10); // Reset on new fetch
   }, [dispatch, user]);
 
   // Close modal on Escape key or overlay click
@@ -1610,8 +1614,22 @@ export default function Ideas() {
                   
                   {/* Ideas Grid */}
                   <div className="grid gap-8 lg:gap-12">
-                    {filteredAndSortedIdeas().map(idea => renderIdeaCard(idea, activeTab === 'my'))}
+                    {filteredAndSortedIdeas().slice(0, visibleIdeasCount).map(idea => renderIdeaCard(idea, activeTab === 'my'))}
                   </div>
+                  {filteredAndSortedIdeas().length > visibleIdeasCount && (
+                    <div className="text-center mt-8">
+                      <button
+                        onClick={() => setVisibleIdeasCount(c => c + 10)}
+                        className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-violet-600 to-purple-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:from-violet-700 hover:to-purple-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 cursor-pointer overflow-hidden"
+                      >
+                        <ChevronDown className="w-6 h-6 relative z-10" />
+                        <span className="relative z-10">Load More Ideas</span>
+                        <span className="text-sm opacity-90 relative z-10">
+                          ({Math.min(10, filteredAndSortedIdeas().length - visibleIdeasCount)} more)
+                        </span>
+                      </button>
+                    </div>
+                  )}
                   
                   {/* End Message */}
                   <div className="text-center py-12">
