@@ -35,6 +35,17 @@ export default function Collaborate() {
   const [expandedHackathon, setExpandedHackathon] = useState(null);
   const [expandedUser, setExpandedUser] = useState(null);
 
+  const [hackIdx, setHackIdx] = useState(10);
+  const [userIdx, setUserIdx] = useState(10);
+  const [hasMoreHackathons, setHasMoreHackathons] = useState(true);
+  const [hasMoreUsers, setHasMoreUsers] = useState(true);
+  const [isLoadingMoreHackathons, setIsLoadingMoreHackathons] = useState(false);
+  const [isLoadingMoreUsers, setIsLoadingMoreUsers] = useState(false);
+
+  const [allPosts, setAllPosts] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
+
+
   useEffect(() => {
     if (activeFeature !== 'hackathon') return;
     setLoading(true);
@@ -42,12 +53,17 @@ export default function Collaborate() {
     fetch('/backend/hackathon-posts', { credentials: 'include' })
       .then(res => res.json().then(data => ({ ok: res.ok, data })))
       .then(({ ok, data }) => {
-        if (ok) setPosts(data);
-        else setError(data.message || 'Failed to fetch posts.');
+        if (ok) {
+          setAllPosts(data); 
+          setPosts(data.slice(0, hackIdx)); 
+          setHasMoreHackathons(data.length > hackIdx);
+        } else {
+          setError(data.message || 'Failed to fetch posts.');
+        }
       })
       .catch(() => setError('Failed to fetch posts.'))
       .finally(() => setLoading(false));
-  }, [activeFeature]);
+  }, [activeFeature, hackIdx]);
 
   useEffect(() => {
     if (activeFeature !== 'founder') return;
@@ -56,15 +72,37 @@ export default function Collaborate() {
     fetch('/backend/auth/users', { credentials: 'include' })
       .then(res => res.json().then(data => ({ ok: res.ok, data })))
       .then(({ ok, data }) => {
-        if (ok) setUsers(data);
-        else setUsersError(data.message || 'Failed to fetch users.');
+        if (ok) {
+          setAllUsers(data); 
+          setUsers(data.slice(0, userIdx)); 
+          setHasMoreUsers(data.length > userIdx);
+        } else {
+          setUsersError(data.message || 'Failed to fetch users.');
+        }
       })
       .catch(() => setUsersError('Failed to fetch users.'))
       .finally(() => setUsersLoading(false));
-  }, [activeFeature]);
+  }, [activeFeature, userIdx]);
+
+
+  const handleLoadMoreHackathons = () => {
+    setIsLoadingMoreHackathons(true);
+    setTimeout(() => {
+      setHackIdx(prev => prev + 10);
+      setIsLoadingMoreHackathons(false);
+    }, 500);
+  };
+  
+  const handleLoadMoreUsers = () => {
+    setIsLoadingMoreUsers(true);
+    setTimeout(() => {
+      setUserIdx(prev => prev + 10);
+      setIsLoadingMoreUsers(false);
+    }, 500);
+  };
 
   const filteredPosts = React.useMemo(() => {
-    let result = posts;
+    let result = allPosts;
     if (activeFeature === 'myposts' && user) {
       result = result.filter(post => post.user === user._id || post.user?._id === user._id);
     }
@@ -104,11 +142,14 @@ export default function Collaborate() {
       default:
         break;
     }
+
+    setHasMoreHackathons(result.length > hackIdx);
+
     return result;
-  }, [posts, searchQuery, filters, sort, activeFeature, user]);
+  }, [allPosts, searchQuery, filters, sort, activeFeature, user, hackIdx]);
 
   const filteredUsers = React.useMemo(() => {
-    let result = users;
+    let result = allUsers;
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       result = result.filter(u =>
@@ -137,8 +178,11 @@ export default function Collaborate() {
       default:
         break;
     }
+
+    setHasMoreUsers(result.length > userIdx);
+
     return result;
-  }, [users, searchQuery, filters, sort]);
+  }, [allUsers, searchQuery, filters, sort, userIdx]);
 
   const handleEditPost = (post) => {
     setEditingPost(post);
@@ -171,6 +215,7 @@ export default function Collaborate() {
       const data = await res.json();
       if (res.ok) {
         setPosts(posts => posts.map(p => (p._id === editingPost._id ? data : p)));
+        setAllPosts(allPosts => allPosts.map(p => (p._id === editingPost._id ? data : p)));
         setEditingPost(null);
       } else {
         setError(data.message || 'Failed to update post.');
@@ -191,6 +236,7 @@ export default function Collaborate() {
       const data = await res.json();
       if (res.ok) {
         setPosts(posts => posts.filter(p => p._id !== deleteModal.post._id));
+        setAllPosts(allPosts => allPosts.filter(p => p._id !== deleteModal.post._id));
         setDeleteModal({ open: false, post: null });
       } else {
         setError(data.message || 'Failed to delete post.');
@@ -214,6 +260,7 @@ export default function Collaborate() {
       const data = await res.json();
       if (res.ok) {
         setPosts(posts => [data, ...posts]);
+        setAllPosts(allPosts => [data, ...allPosts]);
         setShowCreateModal(false);
       } else {
         setError(data.message || 'Failed to post.');
@@ -277,7 +324,7 @@ export default function Collaborate() {
               </div>
             )}
             
-            {filteredPosts.map((post) => (
+            {filteredPosts.slice(0, hackIdx).map((post) => (
               <div key={post._id} className="group relative overflow-hidden">
                 {/* Premium gradient border effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-3xl opacity-0 group-hover:opacity-100 transition-all duration-500 blur-sm scale-105"></div>
@@ -503,7 +550,7 @@ export default function Collaborate() {
                         {(user && (post.user === user._id || post.user?._id === user._id)) ? (
                           <>
                             <button
-                              className="group relative overflow-hidden px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-xl hover:shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2"
+                              className="cursor-pointer group relative overflow-hidden px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-xl hover:shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2"
                               onClick={() => handleEditPost(post)}
                             >
                               <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-indigo-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -511,11 +558,11 @@ export default function Collaborate() {
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                 </svg>
-                                Edit Post
+                                Edit 
                               </div>
                             </button>
                             <button
-                              className="group relative overflow-hidden px-8 py-4 rounded-2xl bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold shadow-xl hover:shadow-2xl hover:shadow-red-500/25 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:ring-offset-2"
+                              className="cursor-pointer group relative overflow-hidden px-8 py-4 rounded-2xl bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold shadow-xl hover:shadow-2xl hover:shadow-red-500/25 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:ring-offset-2"
                               onClick={() => handleDeletePost(post)}
                             >
                               <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -523,13 +570,13 @@ export default function Collaborate() {
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                 </svg>
-                                Delete Post
+                                Delete
                               </div>
                             </button>
                           </>
                         ) : (
                           <button
-                            className="group relative overflow-hidden px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-500 text-white font-bold shadow-xl hover:shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:ring-offset-2"
+                            className="cursor-pointer group relative overflow-hidden px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-500 text-white font-bold shadow-xl hover:shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:ring-offset-2"
                             onClick={() => handleApplyPost(post)}
                           >
                             <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-green-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -547,6 +594,39 @@ export default function Collaborate() {
                 </div>
               </div>
             ))}
+
+            {hasMoreHackathons && (
+              <div className="flex justify-center mt-8">
+                <button
+                  className={`group relative cursor-pointer overflow-hidden px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold shadow-xl hover:shadow-2xl hover:shadow-indigo-500/25 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:ring-offset-2 ${
+                    isLoadingMoreHackathons ? 'opacity-75 cursor-not-allowed' : ''
+                  }`}
+                  onClick={handleLoadMoreHackathons}
+                  disabled={isLoadingMoreHackathons}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-indigo-700 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="relative flex items-center justify-center gap-3">
+                    {isLoadingMoreHackathons ? (
+                      <>
+                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                        </svg>
+                        Loading...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                        </svg>
+                        Load More Hackathons
+                      </>
+                    )}
+                  </div>
+                </button>
+              </div>
+            )}
+
           </div>
         ) : usersLoading ? (
           <div className="flex justify-center items-center min-h-[200px]">
@@ -573,7 +653,7 @@ export default function Collaborate() {
               </div>
             )}
             
-            {filteredUsers.map((u) => (
+            {filteredUsers.slice(0, userIdx).map((u) => (
               <div key={u._id} className="group bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] hover:bg-white/90">
                 <button
                   className="cursor-pointer w-full flex items-center justify-between p-6 focus:outline-none focus:ring-4 focus:ring-blue-500/20 rounded-3xl transition-all duration-300"
@@ -861,6 +941,39 @@ export default function Collaborate() {
                 )}
               </div>
             ))}
+
+            {hasMoreUsers && (
+              <div className="flex justify-center mt-8">
+                <button
+                  className={`group relative cursor-pointer overflow-hidden px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold shadow-xl hover:shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 ${
+                    isLoadingMoreUsers ? 'opacity-75 cursor-not-allowed' : ''
+                  }`}
+                  onClick={handleLoadMoreUsers}
+                  disabled={isLoadingMoreUsers}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-cyan-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="relative flex items-center justify-center gap-3">
+                    {isLoadingMoreUsers ? (
+                      <>
+                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                        </svg>
+                        Loading...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                        </svg>
+                        Load More Users
+                      </>
+                    )}
+                  </div>
+                </button>
+              </div>
+            )}
+
           </div>
         )}
       </main>

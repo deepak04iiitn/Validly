@@ -12,6 +12,7 @@ import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { signoutSuccess, signInSuccess } from './redux/user/userSlice';
 import Collaborate from './pages/Collaborate';
+import Hiring from './pages/Hiring';
 
 
 export default function App() {
@@ -50,6 +51,7 @@ export default function App() {
             <Route path='/ideas' element={<Ideas />} />
             <Route path='/forgot-password' element={<ForgotPassword />} />
             <Route path='/collaborate' element={<Collaborate />} />
+            <Route path='/hiring' element={<Hiring />} />
           </Routes>
         </div>
         <Footer />
