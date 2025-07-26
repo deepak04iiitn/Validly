@@ -23,7 +23,7 @@ import AddCommentForm from '../components/ideas/AddCommentForm';
 import CommentThread from '../components/ideas/CommentThread';
 import AddCommentFormMy from '../components/progress/AddCommentForm';
 import CommentThreadMy from '../components/progress/CommentThread';
-import { Plus, X, TrendingUp, MessageSquare, ThumbsUp, ThumbsDown, ExternalLink, Clock, BarChart3, Lightbulb, Users, Award, AlertTriangle, ChevronDown, Sparkles, Zap, AlertCircle, Share2, Search, Filter, SortAsc, SortDesc, Calendar, Heart } from 'lucide-react';
+import { Plus, X, TrendingUp, MessageSquare, ThumbsUp, ThumbsDown, ExternalLink, Clock, BarChart3, Lightbulb, Users, Award, AlertTriangle, ChevronDown, Sparkles, Zap, AlertCircle, Share2, Search, Filter, SortAsc, SortDesc, Calendar, Heart, ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Development stages configuration
 const DEVELOPMENT_STAGES = [
@@ -94,6 +94,20 @@ const premiumStyles = `
     transform: translateY(-8px);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   }
+  
+  .hamburger-fade {
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+  .hamburger-hidden {
+    transform: translateY(-100px);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .hamburger-visible {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
 `;
 
 export default function Ideas() {
@@ -136,6 +150,45 @@ export default function Ideas() {
 
   // Add after other useState hooks
   const [visibleIdeasCount, setVisibleIdeasCount] = useState(10);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showHamburger, setShowHamburger] = useState(true);
+  const lastScrollY = useRef(typeof window !== 'undefined' ? window.scrollY : 0);
+
+  // Responsive effect: collapse sidebar on small screens by default
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) setSidebarCollapsed(true);
+      else setSidebarCollapsed(false);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          if (currentScrollY < 50) {
+            setShowHamburger(true);
+          } else if (currentScrollY > lastScrollY.current) {
+            // Scrolling down
+            setShowHamburger(false);
+          } else {
+            // Scrolling up
+            setShowHamburger(true);
+          }
+          lastScrollY.current = currentScrollY;
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // If user is not signed in, show a beautiful warning
   if (!user) {
@@ -1056,139 +1109,160 @@ export default function Ideas() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
         <div className="flex flex-col lg:flex-row">
           {/* Premium Sidebar (Sticky) */}
-          <aside className="hidden lg:block w-80 flex-shrink-0">
-            <div className="sticky top-20">
-              <div className="relative bg-white/95 backdrop-blur-xl border-r border-slate-200/60 shadow-2xl animate-fadeIn rounded-tr-3xl rounded-br-3xl min-h-[calc(100vh-80px)]">
-                <div className="absolute inset-0 bg-gradient-to-br from-violet-50/30 via-blue-50/20 to-indigo-50/30 rounded-tr-3xl rounded-br-3xl"></div>
-                <div className="relative p-8 space-y-8 h-full">
-                  {/* Mobile Close Button (hidden on desktop) */}
-                  <div className="lg:hidden absolute top-4 right-4">
+          <aside
+            className={`hidden mt-8 lg:block flex-shrink-0 transition-all duration-300 ${sidebarCollapsed ? 'w-16' : 'w-80'}`}
+            style={{ minWidth: sidebarCollapsed ? 64 : 320, maxWidth: sidebarCollapsed ? 64 : 320 }}
+          >
+            <div className="sticky top-20 h-full">
+              <div
+                className={`relative bg-white/95 backdrop-blur-xl border-r border-slate-200/60 shadow-2xl animate-fadeIn rounded-tr-3xl rounded-br-3xl min-h-[calc(100vh-80px)] transition-all duration-300 ${sidebarCollapsed ? 'px-2 py-4' : 'px-4 pt-8 pb-4 mt-6 space-y-8'}`}
+                style={{ width: sidebarCollapsed ? 64 : 320 }}
+              >
+                {/* Sidebar toggle arrow (scrolls with sidebar) */}
+                <button
+                  onClick={() => setSidebarCollapsed((c) => !c)}
+                  className="hidden lg:flex absolute left-full top-1/2 z-20 bg-white/90 border border-slate-200 rounded-r-2xl shadow-lg hover:bg-violet-50 transition-all cursor-pointer p-2 items-center justify-center"
+                  style={{ transform: 'translateY(-50%)' }}
+                  aria-label={sidebarCollapsed ? 'Open sidebar' : 'Collapse sidebar'}
+                >
+                  {sidebarCollapsed ? <ChevronRight className="w-6 h-6 text-violet-700" /> : <ChevronLeft className="w-6 h-6 text-violet-700" />}
+                </button>
+                {/* Collapsed sidebar: just show icons vertically */}
+                {sidebarCollapsed ? (
+                  <div className="flex flex-col items-center gap-6 mt-8">
                     <button
-                      onClick={() => setSidebarOpen(false)}
-                      className="p-2 bg-white/80 backdrop-blur-sm rounded-xl text-slate-400 hover:text-violet-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-110 cursor-pointer"
+                      className={`w-12 h-12 flex items-center justify-center p-3 rounded-xl ${activeTab === 'all' ? 'bg-violet-100 text-violet-700' : 'text-slate-400 hover:bg-violet-50'}`}
+                      onClick={() => { setActiveTab('all'); resetCommentPages(); }}
                     >
-                      <X className="w-5 h-5" />
+                      <Lightbulb className="w-6 h-6" />
+                    </button>
+                    <button
+                      className={`w-12 h-12 flex items-center justify-center p-3 rounded-xl ${activeTab === 'my' ? 'bg-blue-100 text-blue-700' : 'text-slate-400 hover:bg-blue-50'}`}
+                      onClick={() => { setActiveTab('my'); resetCommentPages(); }}
+                    >
+                      <Award className="w-6 h-6" />
                     </button>
                   </div>
-                  {/* Logo & Title */}
-                  <div className="text-center space-y-4">
-                    <div className="relative inline-block">
-                      <div className="p-4 bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-600 rounded-3xl shadow-2xl animate-float">
-                        <Lightbulb className="w-8 h-8 text-white" />
-                      </div>
-                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full animate-pulse"></div>
-                    </div>
-                    <div>
-                      <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 bg-clip-text text-transparent leading-tight">
-                        Innovation Hub
-                      </h1>
-                      <p className="text-slate-600 text-sm font-medium mt-2">
-                        Discover & share ideas
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Stats */}
-                  <div className="bg-gradient-to-br from-slate-50 to-blue-50/50 rounded-2xl p-6 border border-slate-200/50">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-slate-600">
-                          <Lightbulb className="w-4 h-4 text-violet-500" />
-                          <span className="font-semibold">All Ideas</span>
+                ) : (
+                  <div className="relative px-4 pt-8 pb-4 mt-6 space-y-8 h-full">
+                    {/* Logo & Title */}
+                    <div className="text-center space-y-4">
+                      <div className="relative inline-block">
+                        <div className="p-4 bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-600 rounded-3xl shadow-2xl animate-float">
+                          <Lightbulb className="w-8 h-8 text-white" />
                         </div>
-                        <span className="text-2xl font-bold text-slate-800">{ideas.length}</span>
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full animate-pulse"></div>
                       </div>
-                      {user && (
+                      <div>
+                        <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 bg-clip-text text-transparent leading-tight">
+                          Innovation Hub
+                        </h1>
+                        <p className="text-slate-600 text-sm font-medium mt-2">
+                          Discover & share ideas
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="bg-gradient-to-br from-slate-50 to-blue-50/50 rounded-2xl p-6 border border-slate-200/50">
+                      <div className="space-y-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2 text-slate-600">
-                            <Award className="w-4 h-4 text-blue-500" />
-                            <span className="font-semibold">My Ideas</span>
+                            <Lightbulb className="w-4 h-4 text-violet-500" />
+                            <span className="font-semibold">All Ideas</span>
                           </div>
-                          <span className="text-2xl font-bold text-slate-800">{userIdeas.length}</span>
+                          <span className="text-2xl font-bold text-slate-800">{ideas.length}</span>
                         </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Action Button */}
-                  {user && (
-                    <div className="space-y-4">
-                      <button
-                        className="group relative w-full bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white px-6 py-4 rounded-2xl font-bold text-lg hover:from-violet-700 hover:via-purple-700 hover:to-indigo-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 cursor-pointer overflow-hidden"
-                        onClick={() => setShowForm(true)}
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                        <span className="relative z-10 flex items-center justify-center gap-3">
-                          <Share2 className="w-5 h-5" />
-                          Share Idea
-                        </span>
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Navigation Tabs */}
-                  <div className="space-y-3">
-                    <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Browse Ideas</h3>
-                    <div className="space-y-2">
-                      <button
-                        className={`w-full relative px-4 py-3 rounded-xl font-semibold text-left transition-all duration-300 cursor-pointer ${
-                          activeTab === 'all' 
-                            ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-lg transform scale-105' 
-                            : 'text-slate-600 hover:text-slate-800 hover:bg-white/60'
-                        }`}
-                        onClick={() => {
-                          setActiveTab('all');
-                          resetCommentPages();
-                        }}
-                      >
-                        <span className="relative z-10 flex items-center gap-3">
-                          <Lightbulb className="w-5 h-5" />
-                          All Ideas
-                        </span>
-                        {activeTab === 'all' && (
-                          <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-purple-600 rounded-xl animate-pulse"></div>
+                        {user && (
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-slate-600">
+                              <Award className="w-4 h-4 text-blue-500" />
+                              <span className="font-semibold">My Ideas</span>
+                            </div>
+                            <span className="text-2xl font-bold text-slate-800">{userIdeas.length}</span>
+                          </div>
                         )}
-                      </button>
-                      {user && (
+                      </div>
+                    </div>
+
+                    {/* Action Button */}
+                    {user && (
+                      <div className="space-y-4">
                         <button
-                          className={`w-full relative px-4 py-3 rounded-xl font-semibold text-left transition-all duration-300 cursor-pointer ${
-                            activeTab === 'my' 
+                          className="group relative w-full bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white px-8 py-5 rounded-2xl font-bold text-lg hover:from-violet-700 hover:via-purple-700 hover:to-indigo-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 cursor-pointer overflow-hidden"
+                          onClick={() => setShowForm(true)}
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                          <span className="relative z-10 flex items-center justify-center gap-3">
+                            <Share2 className="w-5 h-5" />
+                            Share Idea
+                          </span>
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Navigation Tabs */}
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Browse Ideas</h3>
+                      <div className="space-y-2">
+                        <button
+                          className={`w-full relative px-6 py-4 rounded-xl font-semibold text-left transition-all duration-300 cursor-pointer ${
+                            activeTab === 'all' 
                               ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-lg transform scale-105' 
                               : 'text-slate-600 hover:text-slate-800 hover:bg-white/60'
                           }`}
                           onClick={() => {
-                            setActiveTab('my');
+                            setActiveTab('all');
                             resetCommentPages();
                           }}
                         >
                           <span className="relative z-10 flex items-center gap-3">
-                            <Award className="w-5 h-5" />
-                            My Ideas
+                            <Lightbulb className="w-5 h-5" />
+                            All Ideas
                           </span>
-                          {activeTab === 'my' && (
+                          {activeTab === 'all' && (
                             <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-purple-600 rounded-xl animate-pulse"></div>
                           )}
                         </button>
-                      )}
+                        {user && (
+                          <button
+                            className={`w-full relative px-6 py-4 rounded-xl font-semibold text-left transition-all duration-300 cursor-pointer ${
+                              activeTab === 'my' 
+                                ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-lg transform scale-105' 
+                                : 'text-slate-600 hover:text-slate-800 hover:bg-white/60'
+                            }`}
+                            onClick={() => {
+                              setActiveTab('my');
+                              resetCommentPages();
+                            }}
+                          >
+                            <span className="relative z-10 flex items-center gap-3">
+                              <Award className="w-5 h-5" />
+                              My Ideas
+                            </span>
+                            {activeTab === 'my' && (
+                              <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-purple-600 rounded-xl animate-pulse"></div>
+                            )}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="pt-8 border-t border-slate-200/50">
+                      <div className="text-center space-y-2">
+                        <p className="text-xs text-slate-500 font-medium">Innovation Hub v2.0</p>
+                        <p className="text-xs text-slate-400">Powered by creativity</p>
+                      </div>
                     </div>
                   </div>
-
-                  
-
-                  {/* Footer */}
-                  <div className="pt-8 border-t border-slate-200/50">
-                    <div className="text-center space-y-2">
-                      <p className="text-xs text-slate-500 font-medium">Innovation Hub v2.0</p>
-                      <p className="text-xs text-slate-400">Powered by creativity</p>
-                    </div>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </aside>
 
           {/* Mobile Sidebar Toggle and Overlay (unchanged) */}
-          <div className="lg:hidden fixed top-24 left-4 z-40">
+          <div className={`lg:hidden fixed top-24 left-4 z-40 hamburger-fade ${showHamburger ? 'hamburger-visible' : 'hamburger-hidden'}`}>
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="p-3 bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl border border-slate-200/60 text-slate-600 hover:text-violet-600 transition-all duration-300 cursor-pointer"
@@ -1263,7 +1337,7 @@ export default function Ideas() {
               {user && (
                 <div className="space-y-4">
                   <button
-                    className="group relative w-full bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white px-6 py-4 rounded-2xl font-bold text-lg hover:from-violet-700 hover:via-purple-700 hover:to-indigo-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 cursor-pointer overflow-hidden"
+                    className="group relative w-full bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white px-8 py-5 rounded-2xl font-bold text-lg hover:from-violet-700 hover:via-purple-700 hover:to-indigo-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 cursor-pointer overflow-hidden"
                     onClick={() => setShowForm(true)}
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
@@ -1280,7 +1354,7 @@ export default function Ideas() {
                 <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Browse Ideas</h3>
                 <div className="space-y-2">
                   <button
-                    className={`w-full relative px-4 py-3 rounded-xl font-semibold text-left transition-all duration-300 cursor-pointer ${
+                    className={`w-full relative px-6 py-4 rounded-xl font-semibold text-left transition-all duration-300 cursor-pointer ${
                       activeTab === 'all' 
                         ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-lg transform scale-105' 
                         : 'text-slate-600 hover:text-slate-800 hover:bg-white/60'
@@ -1300,7 +1374,7 @@ export default function Ideas() {
                   </button>
                   {user && (
                     <button
-                      className={`w-full relative px-4 py-3 rounded-xl font-semibold text-left transition-all duration-300 cursor-pointer ${
+                      className={`w-full relative px-6 py-4 rounded-xl font-semibold text-left transition-all duration-300 cursor-pointer ${
                         activeTab === 'my' 
                           ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-lg transform scale-105' 
                           : 'text-slate-600 hover:text-slate-800 hover:bg-white/60'

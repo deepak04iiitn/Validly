@@ -97,11 +97,6 @@ export default function Home() {
       description: "Share tips, experiences, and resources. Create posts with text, images, and links to spark discussions in a social feed for startup enthusiasts."
     },
     {
-      icon: Zap,
-      title: "Milestone Roadmap & Validation Checkpoints",
-      description: "Visual, interactive roadmaps for your ideas. Define milestones, attach validation actions, and track real-time progress from Not Started to Completed."
-    },
-    {
       icon: Lightbulb,
       title: "Promote Your Business, Startup, Website, or App",
       description: "Spotlight your startup, landing page, website, or app to the Validly community. Create promotion posts with visuals, CTAs, and links, target your audience, collect feedback, and track real engagement—all within Validly. Earn or buy promotion credits for extra reach."
