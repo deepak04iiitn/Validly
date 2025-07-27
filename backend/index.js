@@ -9,6 +9,7 @@ import cron from 'node-cron';
 import ideaRoutes from './routes/idea.route.js';
 import { autoDeleteExpiredIdeas } from './controllers/idea.controller.js';
 import hackathonRoutes from './routes/hackathon.route.js';
+import promoteRoutes from './routes/promote.route.js';
 
 dotenv.config();
 
@@ -39,6 +40,7 @@ mongoose.connect(MONGODB_URI)
 app.use('/backend/auth', authRoutes);
 app.use('/backend/ideas', ideaRoutes);
 app.use('/backend/hackathon-posts', hackathonRoutes);
+app.use('/backend/promote', promoteRoutes);
 
 // Serve resumes as static files
 app.use('/uploads/resumes', express.static(path.resolve('uploads/resumes')));

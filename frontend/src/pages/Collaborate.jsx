@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import FloatingActionPanel from '../components/collaborate/FloatingActionPanel';
 import StickyTopBar from '../components/collaborate/StickyTopBar';
-import HackathonCard from '../components/collaborate/HackathonCard';
-import UserCard from '../components/collaborate/UserCard';
+import LeftStatsPanel from '../components/collaborate/LeftStatsPanel';
+import RightActivityPanel from '../components/collaborate/RightActivityPanel';
+import CornerDecorations from '../components/collaborate/CornerDecorations';
 import HackathonPostForm from '../components/collaborate/HackathonPostForm';
 import { X } from 'lucide-react';
 
@@ -273,6 +274,10 @@ export default function Collaborate() {
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 pt-16 sm:pt-20">
+
+      {/* <LeftStatsPanel />
+      <RightActivityPanel /> */}
+      
       <StickyTopBar
         activeFeature={activeFeature}
         setActiveFeature={setActiveFeature}
