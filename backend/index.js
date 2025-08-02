@@ -10,9 +10,11 @@ import ideaRoutes from './routes/idea.route.js';
 import { autoDeleteExpiredIdeas } from './controllers/idea.controller.js';
 import hackathonRoutes from './routes/hackathon.route.js';
 import promoteRoutes from './routes/promote.route.js';
+import paymentRoutes from './routes/payment.route.js';
+import jobRoutes from './routes/job.route.js';
+
 
 dotenv.config();
-
 
 const __dirname = path.resolve();
 const app = express();
@@ -41,6 +43,8 @@ app.use('/backend/auth', authRoutes);
 app.use('/backend/ideas', ideaRoutes);
 app.use('/backend/hackathon-posts', hackathonRoutes);
 app.use('/backend/promote', promoteRoutes);
+app.use('/backend/payment', paymentRoutes);
+app.use('/backend/jobs', jobRoutes);
 
 // Serve resumes as static files
 app.use('/uploads/resumes', express.static(path.resolve('uploads/resumes')));

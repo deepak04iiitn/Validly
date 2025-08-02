@@ -14,6 +14,7 @@ import { signoutSuccess, signInSuccess } from './redux/user/userSlice';
 import Collaborate from './pages/Collaborate';
 import Hiring from './pages/Hiring';
 import Promote from './pages/Promote';
+import JobDetails from './pages/JobDetails';
 
 
 export default function App() {
@@ -53,6 +54,7 @@ export default function App() {
             <Route path='/forgot-password' element={<ForgotPassword />} />
             <Route path='/collaborate' element={<Collaborate />} />
             <Route path='/hiring' element={<Hiring />} />
+            <Route path="/jobs/:id" element={<JobDetails />} />
             <Route path='/promote' element={<Promote />} />
           </Routes>
         </div>

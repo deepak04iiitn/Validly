@@ -114,6 +114,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    isPaidHiring: {
+        type: Boolean,
+        default: false
+    }
 } , {timestamps : true})
 
 const User = mongoose.model('User' , userSchema);
