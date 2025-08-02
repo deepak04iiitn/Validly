@@ -41,7 +41,6 @@ const jobSchema = new mongoose.Schema({
   }],
   contactEmail: { 
     type: String, 
-    required: true 
   },
   contactPhone: String,
   applicationDeadline: Date,

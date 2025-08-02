@@ -93,6 +93,56 @@ const JobDetails = () => {
     if (expRange.max) return `Up to ${expRange.max} years`;
   };
 
+  // Format job description with proper HTML rendering
+  const formatDescription = (description) => {
+    if (!description) return '';
+    
+    // Convert line breaks to <br> tags
+    let formatted = description.replace(/\n/g, '<br>');
+    
+    // Convert bullet points (-, *, •) to HTML lists
+    formatted = formatted.replace(/^[\s]*[-\*•]\s*(.+)$/gm, '<li>$1</li>');
+    
+    // Wrap consecutive list items in <ul> tags
+    formatted = formatted.replace(/(<li>.*<\/li>)/gs, '<ul class="formatted-list">$1</ul>');
+    
+    // Convert numbered lists (1., 2., etc.) to HTML ordered lists
+    formatted = formatted.replace(/^[\s]*(\d+)\.\s*(.+)$/gm, '<li>$2</li>');
+    formatted = formatted.replace(/(<li>(?:(?!<ul|<\/ul>).)*<\/li>)/gs, (match) => {
+      if (!match.includes('formatted-list')) {
+        return `<ol class="formatted-ordered-list">${match}</ol>`;
+      }
+      return match;
+    });
+    
+    // Make text between **text** bold
+    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // Make text between *text* italic
+    formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    
+    // Convert headings (## Heading)
+    formatted = formatted.replace(/^##\s*(.+)$/gm, '<h3 class="formatted-heading">$1</h3>');
+    
+    // Convert sub-headings (### Sub-heading)
+    formatted = formatted.replace(/^###\s*(.+)$/gm, '<h4 class="formatted-subheading">$1</h4>');
+    
+    // Convert URLs to clickable links
+    formatted = formatted.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="formatted-link">$1</a>');
+    
+    // Wrap paragraphs
+    const paragraphs = formatted.split('<br><br>').filter(p => p.trim());
+    formatted = paragraphs.map(p => {
+      // Don't wrap if it's already a heading or list
+      if (p.startsWith('<h') || p.startsWith('<ul') || p.startsWith('<ol')) {
+        return p;
+      }
+      return `<p class="formatted-paragraph">${p}</p>`;
+    }).join('');
+    
+    return formatted;
+  };
+
   const getJobTypeConfig = (type) => {
     const configs = {
       'full-time': { bg: 'bg-emerald-500', text: 'text-white', bgLight: 'bg-emerald-100', textLight: 'text-emerald-800', icon: '💼' },
@@ -157,7 +207,6 @@ const JobDetails = () => {
       {/* Hero Section */}
       <div className="relative overflow-hidden bg-gradient-to-r from-blue-900 via-indigo-900 to-purple-900">
         <div className="absolute inset-0 bg-black/20"></div>
-        {/* Pattern overlay - using a simpler approach */}
         <div className="absolute inset-0 opacity-10">
           <div className="h-full w-full" style={{
             backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
@@ -269,7 +318,10 @@ const JobDetails = () => {
                 <h2 className="text-2xl font-bold text-gray-900">Job Description</h2>
               </div>
               <div className="prose max-w-none">
-                <p className="text-gray-700 leading-relaxed whitespace-pre-line text-lg">{job.description}</p>
+                <div 
+                  className="formatted-content text-gray-700 leading-relaxed text-lg"
+                  dangerouslySetInnerHTML={{ __html: formatDescription(job.description) }}
+                />
               </div>
             </div>
 
@@ -317,35 +369,53 @@ const JobDetails = () => {
                 <div className="w-3 h-8 bg-gradient-to-b from-orange-500 to-red-600 rounded-full mr-4"></div>
                 <h2 className="text-2xl font-bold text-gray-900">Contact Information</h2>
               </div>
-              <div className="grid md:grid-cols-2 gap-6">
-                {job.contactEmail && (
-                  <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
-                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              
+              {!job.contactEmail && !job.contactPhone ? (
+                <div className="text-center py-8">
+                  <div className="relative mx-auto w-20 h-20 mb-6">
+                    <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-slate-100 rounded-full"></div>
+                    <div className="absolute inset-3 bg-gradient-to-r from-gray-400 to-slate-500 rounded-full flex items-center justify-center">
+                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Email</p>
-                      <p className="font-semibold text-gray-900">{job.contactEmail}</p>
-                    </div>
                   </div>
-                )}
+                  <h3 className="text-lg font-semibold text-gray-700 mb-2">No Contact Details Provided</h3>
+                  <p className="text-gray-500 max-w-md mx-auto">
+                    The employer has not provided specific contact information. Please use the apply button to submit your application through the provided link.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 gap-6">
+                  {job.contactEmail && (
+                    <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
+                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Email</p>
+                        <p className="font-semibold text-gray-900">{job.contactEmail}</p>
+                      </div>
+                    </div>
+                  )}
 
-                {job.contactPhone && (
-                  <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl">
-                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                      <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                      </svg>
+                  {job.contactPhone && (
+                    <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl">
+                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Phone</p>
+                        <p className="font-semibold text-gray-900">{job.contactPhone}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Phone</p>
-                      <p className="font-semibold text-gray-900">{job.contactPhone}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -362,7 +432,6 @@ const JobDetails = () => {
               </div>
 
               <div className="flex space-x-4">
-
                 <button
                   onClick={() => window.open(job.applyLink, '_blank')}
                   disabled={deadlinePassed}
@@ -411,6 +480,80 @@ const JobDetails = () => {
         
         .animate-reverse-spin {
           animation: reverseSpn 1s linear infinite;
+        }
+
+        .formatted-content .formatted-paragraph {
+          margin-bottom: 1rem;
+          line-height: 1.7;
+        }
+
+        .formatted-content .formatted-heading {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: #1f2937;
+          margin: 2rem 0 1rem 0;
+          padding-bottom: 0.5rem;
+          border-bottom: 2px solid #e5e7eb;
+        }
+
+        .formatted-content .formatted-subheading {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #374151;
+          margin: 1.5rem 0 0.75rem 0;
+        }
+
+        .formatted-content .formatted-list {
+          margin: 1rem 0;
+          padding-left: 1.5rem;
+        }
+
+        .formatted-content .formatted-list li {
+          margin-bottom: 0.5rem;
+          color: #4b5563;
+          position: relative;
+        }
+
+        .formatted-content .formatted-list li::marker {
+          color: #3b82f6;
+          font-weight: bold;
+        }
+
+        .formatted-content .formatted-ordered-list {
+          margin: 1rem 0;
+          padding-left: 1.5rem;
+          counter-reset: item;
+        }
+
+        .formatted-content .formatted-ordered-list li {
+          margin-bottom: 0.5rem;
+          color: #4b5563;
+          counter-increment: item;
+        }
+
+        .formatted-content .formatted-ordered-list li::marker {
+          color: #3b82f6;
+          font-weight: bold;
+        }
+
+        .formatted-content .formatted-link {
+          color: #3b82f6;
+          text-decoration: underline;
+          font-weight: 500;
+        }
+
+        .formatted-content .formatted-link:hover {
+          color: #1d4ed8;
+        }
+
+        .formatted-content strong {
+          font-weight: 700;
+          color: #1f2937;
+        }
+
+        .formatted-content em {
+          font-style: italic;
+          color: #4b5563;
         }
       `}</style>
     </div>
