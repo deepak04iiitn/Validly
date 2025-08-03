@@ -19,6 +19,7 @@ import PrivateRoute from './components/PrivateRoute';
 import Dashboard from './pages/Dashboard';
 import MentorApply from './pages/MentorApply';
 import MentorDashboard from './pages/MentorDashboard';
+import MentorProfile from './pages/MentorProfile';
 
 export default function App() {
     const dispatch = useDispatch();
@@ -62,6 +63,7 @@ export default function App() {
                         <Route path='/promote' element={<Promote />} />
                         <Route path='/mentorship' element={<Mentorship />} />
                         <Route path='/mentorship/mentor-apply' element={<MentorApply />} />
+                        <Route path='/mentor-profile/:mentorId' element={<MentorProfile />} />
                         <Route element={<PrivateRoute />}>
                             <Route path='/dashboard' element={<Dashboard />} />
                             <Route path='/mentordashboard' element={<MentorDashboard />} />

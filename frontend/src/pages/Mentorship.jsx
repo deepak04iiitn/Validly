@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Star, Users, Clock, Award, ChevronRight, Video, MessageSquare, Calendar, ArrowRight } from 'lucide-react';
+import { Star, Users, Clock, Award, ChevronRight, Video, MessageSquare, Calendar, ArrowRight, Eye, DollarSign, User, X } from 'lucide-react';
 
 export default function Mentorship() {
     const { currentUser } = useSelector(state => state.user);
     const navigate = useNavigate();
     const [hoveredCard, setHoveredCard] = useState(null);
+    const [sessions, setSessions] = useState([]);
+    const [loading, setLoading] = useState(false);
+
 
     const mentorshipFeatures = [
         {
@@ -38,6 +41,56 @@ export default function Mentorship() {
             navigate('/sign-in');
         } else {
             navigate('/mentorship/mentor-apply');
+        }
+    };
+
+    useEffect(() => {
+        fetchSessions();
+    }, []);
+
+    const fetchSessions = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch('/backend/sessions/all');
+            const data = await res.json();
+            
+            if (res.ok && data.success) {
+                setSessions(data.data || []);
+            }
+        } catch (err) {
+            console.error('Error fetching sessions:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleViewMentorProfile = (mentorId) => {
+        navigate(`/mentor-profile/${mentorId}`);
+    };
+
+    const handleJoinSession = async (sessionId) => {
+        if (!currentUser) {
+            navigate('/sign-in');
+            return;
+        }
+
+        try {
+            const res = await fetch(`/backend/sessions/${sessionId}/join`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${currentUser.token}`
+                }
+            });
+            const data = await res.json();
+            
+            if (res.ok && data.success) {
+                alert('Successfully registered for session!');
+                fetchSessions(); // Refresh sessions
+            } else {
+                alert(data.message || 'Failed to join session');
+            }
+        } catch (err) {
+            alert('Failed to join session');
         }
     };
 
@@ -147,6 +200,96 @@ export default function Mentorship() {
                 </div>
             </section>
 
+            {/* Available Sessions Section */}
+            <section className="py-20 px-6">
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center mb-16">
+                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                            Available
+                            <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent"> Sessions</span>
+                        </h2>
+                        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                            Join expert-led sessions and accelerate your learning journey
+                        </p>
+                    </div>
+
+                    {loading ? (
+                        <div className="text-center py-12">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+                            <p className="mt-4 text-gray-600">Loading sessions...</p>
+                        </div>
+                    ) : sessions.length === 0 ? (
+                        <div className="text-center py-12">
+                            <Video className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                            <p className="text-gray-600 text-lg">No sessions available at the moment</p>
+                            <p className="text-gray-500">Check back later for new mentoring sessions</p>
+                        </div>
+                    ) : (
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {sessions.map((session) => (
+                                <div
+                                    key={session._id}
+                                    className="group relative bg-white/70 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/50 hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+                                >
+                                    <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-blue-600 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    
+                                    <div className="relative bg-white rounded-3xl p-6">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="flex items-center gap-2">
+                                                <Video className="w-5 h-5 text-purple-600" />
+                                                <span className="text-sm font-medium text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
+                                                    {session.sessionType}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <DollarSign className="w-4 h-4 text-green-600" />
+                                                <span className="font-bold text-green-600">${session.price}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <h3 className="text-xl font-bold text-gray-900 mb-2">{session.title}</h3>
+                                        <p className="text-gray-600 mb-4 line-clamp-3">{session.description}</p>
+                                        
+                                        <div className="space-y-2 mb-4">
+                                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                <Clock className="w-4 h-4" />
+                                                <span>{session.duration} minutes</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                <Calendar className="w-4 h-4" />
+                                                <span>{new Date(session.scheduledDate).toLocaleDateString()}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                <Users className="w-4 h-4" />
+                                                <span>{session.participants.length}/{session.maxParticipants} participants</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => handleViewMentorProfile(session.mentorId._id)}
+                                                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+                                            >
+                                                <User className="w-4 h-4" />
+                                                View Mentor
+                                            </button>
+                                            <button
+                                                onClick={() => handleJoinSession(session._id)}
+                                                disabled={session.participants.length >= session.maxParticipants}
+                                                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                <Eye className="w-4 h-4" />
+                                                {session.participants.length >= session.maxParticipants ? 'Full' : 'Join'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </section>
+
             <section className="py-20 px-6">
                 <div className="max-w-4xl mx-auto">
                     <div className="relative bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 rounded-3xl p-12 md:p-16 text-center shadow-2xl overflow-hidden">
@@ -175,6 +318,8 @@ export default function Mentorship() {
                     </div>
                 </div>
             </section>
+
+
         </div>
     );
 }

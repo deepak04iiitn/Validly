@@ -13,6 +13,7 @@ import promoteRoutes from './routes/promote.route.js';
 import paymentRoutes from './routes/payment.route.js';
 import jobRoutes from './routes/job.route.js';
 import mentorRoutes from './routes/mentor.route.js';
+import sessionRoutes from './routes/session.route.js';
 
 
 dotenv.config();
@@ -47,6 +48,7 @@ app.use('/backend/promote', promoteRoutes);
 app.use('/backend/payment', paymentRoutes);
 app.use('/backend/jobs', jobRoutes);
 app.use('/backend/mentor', mentorRoutes);
+app.use('/backend/sessions', sessionRoutes);
 
 // Serve resumes as static files
 app.use('/uploads/resumes', express.static(path.resolve('uploads/resumes')));

@@ -5,7 +5,8 @@ import {
     getMentorApplications, 
     getMentorApplicationsByStatus,
     updateApplicationStatus, 
-    getMentorDashboard 
+    getMentorDashboard,
+    updateMentorApplication
 } from '../controllers/mentor.controller.js';
 
 const router = express.Router();
@@ -24,5 +25,8 @@ router.post('/application/:userId', verifyUser, updateApplicationStatus);
 
 // Mentor dashboard data
 router.get('/dashboard', verifyUser, getMentorDashboard);
+
+// Update mentor application
+router.put('/update-application', verifyUser, updateMentorApplication);
 
 export default router;

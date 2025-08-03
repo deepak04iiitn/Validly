@@ -143,3 +143,41 @@ export const getMentorDashboard = async (req, res, next) => {
         next(error);
     }
 };
+
+// Update mentor application
+export const updateMentorApplication = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const updateData = req.body;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return next(errorHandler(404, 'User not found'));
+        }
+
+        if (!user.isMentor) {
+            return next(errorHandler(403, 'Mentor access required'));
+        }
+
+        // Only allow updates if status is pending or approved
+        if (user.mentorProfile.mentorStatus === 'rejected') {
+            return next(errorHandler(400, 'Cannot update rejected application'));
+        }
+
+        // Update mentor profile
+        user.mentorProfile = {
+            ...user.mentorProfile,
+            ...updateData
+        };
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Mentor application updated successfully',
+            mentorProfile: user.mentorProfile
+        });
+    } catch (error) {
+        next(error);
+    }
+};

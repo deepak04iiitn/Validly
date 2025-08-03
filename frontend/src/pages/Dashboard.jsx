@@ -15,6 +15,7 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [error, setError] = useState(null);
+    const [expandedApplications, setExpandedApplications] = useState(new Set());
 
     useEffect(() => {
         if (!currentUser) {
@@ -143,6 +144,16 @@ export default function Dashboard() {
         }
     };
 
+    const toggleApplicationDetails = (appId) => {
+        const newExpanded = new Set(expandedApplications);
+        if (newExpanded.has(appId)) {
+            newExpanded.delete(appId);
+        } else {
+            newExpanded.add(appId);
+        }
+        setExpandedApplications(newExpanded);
+    };
+
     if (loading) return <div className="text-center py-12">Loading...</div>;
     if (error) return <div className="text-center py-12 text-red-500">{error}</div>;
 
@@ -208,11 +219,20 @@ export default function Dashboard() {
                                                         <p className="text-gray-600">{app.email}</p>
                                                     </div>
                                                 </div>
-                                                <span className={getStatusBadge(app.mentorProfile?.mentorStatus)}>
-                                                    {app.mentorProfile?.mentorStatus}
-                                                </span>
+                                                <div className="flex items-center gap-3">
+                                                    <span className={getStatusBadge(app.mentorProfile?.mentorStatus)}>
+                                                        {app.mentorProfile?.mentorStatus}
+                                                    </span>
+                                                    <button
+                                                        onClick={() => toggleApplicationDetails(app._id)}
+                                                        className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+                                                    >
+                                                        {expandedApplications.has(app._id) ? 'Hide Details' : 'Show Complete Details'}
+                                                    </button>
+                                                </div>
                                             </div>
                                             
+                                            {/* Basic Details */}
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                                 <div>
                                                     <p><strong>Role:</strong> {app.mentorProfile?.currentRole || 'N/A'}</p>
@@ -227,6 +247,59 @@ export default function Dashboard() {
                                                     <p><strong>Languages:</strong> {app.mentorProfile?.languages?.join(', ') || 'N/A'}</p>
                                                 </div>
                                             </div>
+
+                                            {/* Complete Details (Hidden by default) */}
+                                            {expandedApplications.has(app._id) && (
+                                                <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
+                                                    <h4 className="text-lg font-semibold mb-4 text-gray-800">Complete Application Details</h4>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                        <div className="space-y-3">
+                                                            <div>
+                                                                <strong className="text-gray-700">Contact Information:</strong>
+                                                                <p>Phone: {app.mentorProfile?.phoneNumber || 'N/A'}</p>
+                                                                <p>Timezone: {app.mentorProfile?.timezone || 'N/A'}</p>
+                                                                <p>LinkedIn: {app.mentorProfile?.linkedIn || 'N/A'}</p>
+                                                                <p>Portfolio: {app.mentorProfile?.portfolioUrl || 'N/A'}</p>
+                                                            </div>
+                                                            <div>
+                                                                <strong className="text-gray-700">Experience:</strong>
+                                                                <p>Past Experience: {app.mentorProfile?.pastExperience || 'N/A'}</p>
+                                                                <p>Session Types: {app.mentorProfile?.sessionTypes?.join(', ') || 'N/A'}</p>
+                                                                <p>Booking Notice: {app.mentorProfile?.bookingNotice || 'N/A'}</p>
+                                                            </div>
+                                                            <div>
+                                                                <strong className="text-gray-700">Credentials:</strong>
+                                                                <p>Government ID: {app.mentorProfile?.governmentId ? 'Provided' : 'Not provided'}</p>
+                                                                <p>Credentials: {app.mentorProfile?.credentials?.join(', ') || 'N/A'}</p>
+                                                                <p>Intro Video: {app.mentorProfile?.introVideo ? 'Provided' : 'Not provided'}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="space-y-3">
+                                                            <div>
+                                                                <strong className="text-gray-700">Bio:</strong>
+                                                                <p>Short Bio: {app.mentorProfile?.shortBio || 'N/A'}</p>
+                                                                <p>Detailed Bio: {app.mentorProfile?.detailedBio || 'N/A'}</p>
+                                                            </div>
+                                                            <div>
+                                                                <strong className="text-gray-700">Bank Details:</strong>
+                                                                <p>Payment Method: {app.mentorProfile?.bankDetails?.paymentMethod || 'N/A'}</p>
+                                                                <p>Account Number: {app.mentorProfile?.bankDetails?.accountNumber || 'N/A'}</p>
+                                                                <p>Tax Info: {app.mentorProfile?.bankDetails?.taxInfo || 'N/A'}</p>
+                                                            </div>
+                                                            <div>
+                                                                <strong className="text-gray-700">Community Involvement:</strong>
+                                                                <p>Group AMA: {app.mentorProfile?.communityInvolvement?.groupAMA ? 'Yes' : 'No'}</p>
+                                                                <p>Content Writing: {app.mentorProfile?.communityInvolvement?.contentWriting ? 'Yes' : 'No'}</p>
+                                                                <p>Competition Judge: {app.mentorProfile?.communityInvolvement?.competitionJudge ? 'Yes' : 'No'}</p>
+                                                            </div>
+                                                            <div>
+                                                                <strong className="text-gray-700">Legal:</strong>
+                                                                <p>NDA Consent: {app.mentorProfile?.ndaConsent ? 'Agreed' : 'Not agreed'}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
 
                                             {/* Action buttons for pending applications */}
                                             {app.mentorProfile?.mentorStatus === 'pending' && (
