@@ -5,6 +5,7 @@ import JobForm from '../components/hiring/JobForm';
 import JobCard from '../components/hiring/JobCard';
 import JobSearch from '../components/hiring/JobSearch';
 import { GraduationCap } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Hiring = () => {
   const user = useSelector(state => state.user.currentUser);
@@ -15,6 +16,8 @@ const Hiring = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({});
+
+  const navigate = useNavigate();
 
   const fetchJobs = async (page = 1, search = '', filterParams = {}) => {
     setLoading(true);
@@ -239,7 +242,9 @@ const Hiring = () => {
           <p className="text-gray-600 mb-8 max-w-md mx-auto">
             Please sign in to your account to post job opportunities and connect with talented professionals.
           </p>
-          <button className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+          <button className="cursor-pointer inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+            onClick={() => navigate('/sign-in')}
+          >
             <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
             </svg>

@@ -1,28 +1,27 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-    username : {
-        type : String,
-        required : true,
-        unique : true,
+    username: {
+        type: String,
+        required: true,
+        unique: true,
     },
-    email : {
-        type : String,
-        required : true,
-        unique : true,
+    email: {
+        type: String,
+        required: true,
+        unique: true,
     },
-    password : {
-        type : String,
-        required : true,
+    password: {
+        type: String,
+        required: true,
     },
-    profilePicture : {
-        type : String,
-        default : "https://www.pngall.com/wp-content/uploads/5/Profile.png",
-        // Stores the Cloudinary image URL
+    profilePicture: {
+        type: String,
+        default: "https://www.pngall.com/wp-content/uploads/5/Profile.png",
     },
-    isUserAdmin : {
-        type : Boolean,
-        default : false,
+    isUserAdmin: {
+        type: Boolean,
+        default: false,
     },
     fullName: {
         type: String,
@@ -41,7 +40,7 @@ const userSchema = new mongoose.Schema({
         default: '',
     },
     role: {
-        type: String, // Founder / Co-Founder / Hustler
+        type: String,
         default: '',
     },
     resumeLink: {
@@ -57,17 +56,15 @@ const userSchema = new mongoose.Schema({
         default: '',
     },
     bestWorks: {
-        type: [
-            {
-                description: { type: String, required: true },
-                github: { type: String, default: '' },
-                live: { type: String, default: '' },
-            }
-        ],
+        type: [{
+            description: { type: String, required: true },
+            github: { type: String, default: '' },
+            live: { type: String, default: '' },
+        }],
         default: [],
     },
     userType: {
-        type: String, // Student or Working Professional
+        type: String,
         default: '',
     },
     degree: {
@@ -117,9 +114,51 @@ const userSchema = new mongoose.Schema({
     isPaidHiring: {
         type: Boolean,
         default: false
+    },
+    isMentor: {
+        type: Boolean,
+        default: false,
+    },
+    mentorProfile: {
+        phoneNumber: { type: String, default: '' },
+        timezone: { type: String, default: '' },
+        currentRole: { type: String, default: '' },
+        currentOrganization: { type: String, default: '' },
+        linkedIn: { type: String, default: '' },
+        portfolioUrl: { type: String, default: '' },
+        pastExperience: { type: String, default: '' },
+        expertiseDomains: { type: [String], default: [] },
+        mentorshipTopics: { type: [String], default: [] },
+        sessionTypes: { type: [String], default: [] },
+        sessionPrice: { type: Number, default: 0 },
+        sessionDuration: { type: String, default: '' },
+        availableSlots: [{
+            day: String,
+            times: [String]
+        }],
+        bookingNotice: { type: String, default: '' },
+        governmentId: { type: String, default: '' },
+        credentials: [{ type: String }],
+        introVideo: { type: String, default: '' },
+        bankDetails: {
+            accountNumber: { type: String, default: '' },
+            paymentMethod: { type: String, default: '' },
+            taxInfo: { type: String, default: '' }
+        },
+        ndaConsent: { type: Boolean, default: false },
+        shortBio: { type: String, default: '' },
+        detailedBio: { type: String, default: '' },
+        languages: { type: [String], default: [] },
+        visibility: { type: String, enum: ['public', 'invite-only'], default: 'public' },
+        communityInvolvement: {
+            groupAMA: { type: Boolean, default: false },
+            contentWriting: { type: Boolean, default: false },
+            competitionJudge: { type: Boolean, default: false }
+        },
+        mentorStatus: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+        complianceAgreed: { type: Boolean, default: false }
     }
-} , {timestamps : true})
+}, { timestamps: true });
 
-const User = mongoose.model('User' , userSchema);
-
+const User = mongoose.model('User', userSchema);
 export default User;

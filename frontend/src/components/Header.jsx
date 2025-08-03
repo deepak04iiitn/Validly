@@ -237,6 +237,33 @@ export default function Header() {
                       <UserIcon className="w-5 h-5 text-purple-500" />
                       Profile
                     </a>
+
+                    {user.isUserAdmin && (
+                      <a
+                        href="/dashboard"
+                        className="block px-5 py-3 text-gray-800 hover:bg-purple-50 hover:text-purple-700 font-semibold rounded-2xl transition-all duration-200 cursor-pointer text-base flex items-center gap-3"
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        Dashboard
+                      </a>
+                    )}
+
+                    {user.isMentor && (
+                      <a
+                        href="/mentordashboard"
+                        className="block px-5 py-3 text-gray-800 hover:bg-purple-50 hover:text-purple-700 font-semibold rounded-2xl transition-all duration-200 cursor-pointer text-base flex items-center gap-3"
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        Mentor Dashboard
+                      </a>
+                    )}
+
                     <button
                       className="block w-full text-left px-5 py-3 text-gray-800 hover:bg-pink-50 hover:text-pink-600 font-semibold rounded-2xl transition-all duration-200 cursor-pointer text-base mt-1 flex items-center gap-3"
                       onClick={async () => {
@@ -345,6 +372,27 @@ export default function Header() {
                 >
                   Profile
                 </a>
+
+                {user.isUserAdmin && (
+                  <a
+                    href="/dashboard"
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-green-500 to-teal-500 text-white font-bold shadow-lg border border-green-300 hover:from-green-600 hover:to-teal-600 transition-colors duration-200 cursor-pointer text-center mb-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Dashboard
+                  </a>
+                )}
+
+                {user.isMentor && (
+                  <a
+                    href="/mentordashboard"
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-green-500 to-teal-500 text-white font-bold shadow-lg border border-green-300 hover:from-green-600 hover:to-teal-600 transition-colors duration-200 cursor-pointer text-center mb-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Mentor Dashboard
+                  </a>
+                )}
+
                 <button
                   className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold shadow-lg border border-pink-300 hover:from-pink-600 hover:to-purple-600 transition-colors duration-200 cursor-pointer text-center"
                   onClick={async () => {
