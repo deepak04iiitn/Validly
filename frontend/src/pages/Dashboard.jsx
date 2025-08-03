@@ -267,12 +267,6 @@ export default function Dashboard() {
                                                                 <p>Session Types: {app.mentorProfile?.sessionTypes?.join(', ') || 'N/A'}</p>
                                                                 <p>Booking Notice: {app.mentorProfile?.bookingNotice || 'N/A'}</p>
                                                             </div>
-                                                            <div>
-                                                                <strong className="text-gray-700">Credentials:</strong>
-                                                                <p>Government ID: {app.mentorProfile?.governmentId ? 'Provided' : 'Not provided'}</p>
-                                                                <p>Credentials: {app.mentorProfile?.credentials?.join(', ') || 'N/A'}</p>
-                                                                <p>Intro Video: {app.mentorProfile?.introVideo ? 'Provided' : 'Not provided'}</p>
-                                                            </div>
                                                         </div>
                                                         <div className="space-y-3">
                                                             <div>
@@ -284,17 +278,12 @@ export default function Dashboard() {
                                                                 <strong className="text-gray-700">Bank Details:</strong>
                                                                 <p>Payment Method: {app.mentorProfile?.bankDetails?.paymentMethod || 'N/A'}</p>
                                                                 <p>Account Number: {app.mentorProfile?.bankDetails?.accountNumber || 'N/A'}</p>
-                                                                <p>Tax Info: {app.mentorProfile?.bankDetails?.taxInfo || 'N/A'}</p>
                                                             </div>
                                                             <div>
                                                                 <strong className="text-gray-700">Community Involvement:</strong>
                                                                 <p>Group AMA: {app.mentorProfile?.communityInvolvement?.groupAMA ? 'Yes' : 'No'}</p>
                                                                 <p>Content Writing: {app.mentorProfile?.communityInvolvement?.contentWriting ? 'Yes' : 'No'}</p>
                                                                 <p>Competition Judge: {app.mentorProfile?.communityInvolvement?.competitionJudge ? 'Yes' : 'No'}</p>
-                                                            </div>
-                                                            <div>
-                                                                <strong className="text-gray-700">Legal:</strong>
-                                                                <p>NDA Consent: {app.mentorProfile?.ndaConsent ? 'Agreed' : 'Not agreed'}</p>
                                                             </div>
                                                         </div>
                                                     </div>

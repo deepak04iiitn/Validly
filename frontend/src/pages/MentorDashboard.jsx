@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { User, Calendar, DollarSign, MessageSquare, AlertCircle, Plus, Edit, Video, Users, Clock, X } from 'lucide-react';
+import { Menu, X, User, Calendar, DollarSign, Video, Bell, Settings, LogOut, Shield, Star, TrendingUp } from 'lucide-react';
+import MentorProfile from '../components/mentor-dashboard/MentorProfile';
+import MentorAvailability from '../components/mentor-dashboard/MentorAvailability';
+import MentorPayment from '../components/mentor-dashboard/MentorPayment';
+import MentorSessions from '../components/mentor-dashboard/MentorSessions';
+import SessionFormModal from '../components/mentor-dashboard/SessionFormModal';
+import EditApplicationModal from '../components/mentor-dashboard/EditApplicationModal';
 
 export default function MentorDashboard() {
     const { currentUser } = useSelector(state => state.user);
@@ -12,6 +18,8 @@ export default function MentorDashboard() {
     const [sessions, setSessions] = useState([]);
     const [showSessionForm, setShowSessionForm] = useState(false);
     const [showEditForm, setShowEditForm] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [activeSection, setActiveSection] = useState('profile');
     const [sessionForm, setSessionForm] = useState({
         title: '',
         description: '',
@@ -21,10 +29,7 @@ export default function MentorDashboard() {
         duration: 60,
         maxParticipants: 1,
         scheduledDate: '',
-        timeSlot: {
-            startTime: '',
-            endTime: ''
-        },
+        timeSlot: { startTime: '', endTime: '' },
         timezone: '',
         requirements: [],
         materials: []
@@ -65,7 +70,6 @@ export default function MentorDashboard() {
 
         fetchMentorData();
         
-        // Fetch sessions if mentor is approved
         if (currentUser && currentUser.isMentor) {
             fetchSessions();
         }
@@ -175,808 +179,334 @@ export default function MentorDashboard() {
         }
     };
 
-    if (loading) return <div className="text-center py-12">Loading...</div>;
-    if (error) return <div className="text-center py-12 text-red-500">{error}</div>;
-    if (!mentorData) return <div className="text-center py-12 text-red-500">No mentor data found</div>;
+    const sidebarItems = [
+        { id: 'profile', label: 'Profile', icon: User, available: true, description: 'Manage your profile' },
+        { id: 'availability', label: 'Availability', icon: Calendar, available: mentorData?.mentorStatus === 'approved', description: 'Set your schedule' },
+        { id: 'payment', label: 'Payment', icon: DollarSign, available: mentorData?.mentorStatus === 'approved', description: 'Earnings & payouts' },
+        { id: 'sessions', label: 'Sessions', icon: Video, available: mentorData?.mentorStatus === 'approved', description: 'Manage sessions' }
+    ];
+
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'approved': return 'text-emerald-600 bg-emerald-50 border-emerald-200';
+            case 'pending': return 'text-amber-600 bg-amber-50 border-amber-200';
+            case 'rejected': return 'text-red-600 bg-red-50 border-red-200';
+            default: return 'text-gray-600 bg-gray-50 border-gray-200';
+        }
+    };
+
+    const renderContent = () => {
+        if (!mentorData) return null;
+
+        const contentClasses = "bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 backdrop-blur-sm bg-white/95";
+
+        switch (activeSection) {
+            case 'profile':
+                return (
+                    <div className={contentClasses}>
+                        <MentorProfile 
+                            mentorData={mentorData} 
+                            setShowEditForm={setShowEditForm}
+                        />
+                    </div>
+                );
+            case 'availability':
+                if (mentorData.mentorStatus === 'approved') {
+                    return (
+                        <div className={contentClasses}>
+                            <MentorAvailability mentorData={mentorData} />
+                        </div>
+                    );
+                }
+                break;
+            case 'payment':
+                if (mentorData.mentorStatus === 'approved') {
+                    return (
+                        <div className={contentClasses}>
+                            <MentorPayment mentorData={mentorData} />
+                        </div>
+                    );
+                }
+                break;
+            case 'sessions':
+                if (mentorData.mentorStatus === 'approved') {
+                    return (
+                        <div className={contentClasses}>
+                            <MentorSessions 
+                                sessions={sessions}
+                                setShowSessionForm={setShowSessionForm}
+                                handleDeleteSession={handleDeleteSession}
+                            />
+                        </div>
+                    );
+                }
+                break;
+            default:
+                return null;
+        }
+    };
+
+    if (loading) return (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 px-4">
+            <div className="text-center max-w-sm w-full">
+                <div className="relative">
+                    <div className="animate-spin rounded-full h-16 w-16 border-4 border-indigo-100 border-t-indigo-600 mx-auto mb-6"></div>
+                    <div className="absolute inset-0 rounded-full h-16 w-16 border-4 border-transparent border-t-indigo-400 animate-ping mx-auto opacity-20"></div>
+                </div>
+                <div className="text-xl font-semibold text-gray-800 mb-2">Loading Dashboard</div>
+                <div className="text-gray-500">Please wait while we prepare your data...</div>
+            </div>
+        </div>
+    );
+
+    if (error) return (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-rose-50 px-4">
+            <div className="text-center max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-red-100">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <X className="w-8 h-8 text-red-600" />
+                </div>
+                <div className="text-red-600 text-xl font-semibold mb-2">Something went wrong</div>
+                <div className="text-gray-600 text-base break-words">{error}</div>
+                <button 
+                    onClick={() => window.location.reload()} 
+                    className="mt-6 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                >
+                    Try Again
+                </button>
+            </div>
+        </div>
+    );
+
+    if (!mentorData) return (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-gray-50 px-4">
+            <div className="text-center max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
+                <div className="text-gray-400 text-xl font-semibold">No mentor data found</div>
+            </div>
+        </div>
+    );
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-6">
-            <div className="max-w-4xl mx-auto">
-                <h1 className="text-4xl font-bold text-gray-900 mb-8 text-center">Mentor Dashboard</h1>
-                
-                <div className="bg-white p-8 rounded-2xl shadow-xl space-y-6">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <User className="w-8 h-8 text-purple-600" />
-                            <div>
-                                <h2 className="text-2xl font-semibold">Status: {mentorData.mentorStatus}</h2>
-                                {mentorData.mentorStatus === 'pending' && (
-                                    <p className="text-gray-600">Your application is under review. You'll be notified once approved.</p>
-                                )}
-                                {mentorData.mentorStatus === 'rejected' && (
-                                    <p className="text-red-500">Your application was not approved. Please contact support for more information.</p>
-                                )}
-                                {mentorData.mentorStatus === 'approved' && (
-                                    <p className="text-green-600">Your application has been approved! You can now start mentoring.</p>
-                                )}
+        <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50">
+            {/* Premium Header */}
+            <header className="bg-white/80 backdrop-blur-xl border-b border-gray-200/50 relative z-10 h-16 lg:h-18 flex-shrink-0 shadow-sm">
+                <div className="px-4 lg:px-8 h-full">
+                    <div className="flex justify-between items-center h-full">
+                        <div className="flex items-center min-w-0">
+                            <button
+                                onClick={() => setSidebarOpen(true)}
+                                className="lg:hidden p-2 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 transition-all duration-200 hover:scale-105"
+                                aria-label="Open sidebar"
+                            >
+                                <Menu className="h-6 w-6" />
+                            </button>
+                            <div className="flex items-center ml-4 lg:ml-0">
+                                <div className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                                    Validly
+                                </div>
+                                <div className="ml-3 px-3 py-1 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs font-medium rounded-full">
+                                    MENTOR
+                                </div>
                             </div>
                         </div>
-                        {mentorData.mentorStatus !== 'rejected' && (
-                            <button
-                                onClick={() => setShowEditForm(true)}
-                                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        
+                        <div className="flex items-center space-x-3 lg:space-x-4">
+                            {/* Status Badge */}
+                            <div className={`hidden sm:flex items-center px-3 py-1.5 rounded-full text-xs font-medium border ${getStatusColor(mentorData?.mentorStatus)}`}>
+                                <Shield className="w-3 h-3 mr-1.5" />
+                                {mentorData?.mentorStatus?.toUpperCase()}
+                            </div>
+                            
+                            <button 
+                                className="p-2.5 text-gray-400 hover:text-indigo-600 transition-all duration-200 rounded-xl hover:bg-indigo-50 relative group"
+                                aria-label="Notifications"
                             >
-                                <Edit className="w-4 h-4" />
-                                Edit Application
+                                <Bell className="h-5 w-5" />
+                                <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full animate-pulse group-hover:scale-110 transition-transform"></span>
                             </button>
-                        )}
+                            
+                            <div className="flex items-center space-x-3 bg-gray-50/80 rounded-xl p-2 hover:bg-gray-100/80 transition-all duration-200">
+                                <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-md">
+                                    <User className="h-4 w-4 text-white" />
+                                </div>
+                                <span className="text-sm font-semibold text-gray-700 truncate max-w-32 lg:max-w-40">
+                                    {currentUser?.name || 'User'}
+                                </span>
+                            </div>
+                        </div>
                     </div>
+                </div>
+            </header>
 
-                    {mentorData.mentorStatus === 'approved' && mentorData.mentorProfile && (
-                        <>
-                            <div className="flex items-center gap-4">
-                                <MessageSquare className="w-8 h-8 text-purple-600" />
+            {/* Main Layout */}
+            <div className="flex flex-1 overflow-hidden">
+                {/* Mobile Overlay */}
+                {sidebarOpen && (
+                    <div 
+                        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 lg:hidden"
+                        onClick={() => setSidebarOpen(false)}
+                        aria-hidden="true"
+                    />
+                )}
+
+                {/* Premium Sidebar */}
+                <aside className={`w-72 xl:w-80 bg-white/95 backdrop-blur-xl shadow-2xl flex-shrink-0 lg:flex lg:flex-col transform transition-all duration-300 ease-out border-r border-gray-200/50 ${
+                    sidebarOpen ? 'fixed inset-y-0 left-0 z-40 translate-x-0' : 'fixed inset-y-0 left-0 z-40 -translate-x-full lg:relative lg:translate-x-0'
+                }`}>
+                    <div className="flex flex-col h-full">
+                        <div className="flex-1 flex flex-col pt-6 pb-4 overflow-y-auto">
+                            {/* Sidebar Header */}
+                            <div className="flex items-center justify-between px-6 mb-8">
                                 <div>
-                                    <h2 className="text-2xl font-semibold">Mentorship Profile</h2>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                                        <div>
-                                            <p className="text-gray-600"><strong>Short Bio:</strong> {mentorData.mentorProfile.shortBio || 'N/A'}</p>
-                                            <p className="text-gray-600"><strong>Topics:</strong> {mentorData.mentorProfile.mentorshipTopics?.join(', ') || 'N/A'}</p>
-                                            <p className="text-gray-600"><strong>Expertise:</strong> {mentorData.mentorProfile.expertiseDomains?.join(', ') || 'N/A'}</p>
-                                            <p className="text-gray-600"><strong>Languages:</strong> {mentorData.mentorProfile.languages?.join(', ') || 'N/A'}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-gray-600"><strong>Price:</strong> ${mentorData.mentorProfile.sessionPrice || 0}/hour</p>
-                                            <p className="text-gray-600"><strong>Duration:</strong> {mentorData.mentorProfile.sessionDuration || 'N/A'} minutes</p>
-                                            <p className="text-gray-600"><strong>Session Types:</strong> {mentorData.mentorProfile.sessionTypes?.join(', ') || 'N/A'}</p>
-                                            <p className="text-gray-600"><strong>Visibility:</strong> {mentorData.mentorProfile.visibility || 'N/A'}</p>
-                                        </div>
-                                    </div>
+                                    <h2 className="text-xl font-bold text-gray-900">Dashboard</h2>
+                                    <p className="text-sm text-gray-500 mt-1">Mentor Portal</p>
                                 </div>
+                                <button
+                                    onClick={() => setSidebarOpen(false)}
+                                    className="lg:hidden p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all duration-200"
+                                    aria-label="Close sidebar"
+                                >
+                                    <X className="h-5 w-5" />
+                                </button>
                             </div>
 
-                            <div className="flex items-center gap-4">
-                                <Calendar className="w-8 h-8 text-purple-600" />
-                                <div>
-                                    <h2 className="text-2xl font-semibold">Availability & Contact</h2>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                                        <div>
-                                            <p className="text-gray-600"><strong>Timezone:</strong> {mentorData.mentorProfile.timezone || 'N/A'}</p>
-                                            <p className="text-gray-600"><strong>Booking Notice:</strong> {mentorData.mentorProfile.bookingNotice || 'N/A'}</p>
-                                            {mentorData.mentorProfile.availableSlots && mentorData.mentorProfile.availableSlots.length > 0 ? (
-                                                <div>
-                                                    <p className="text-gray-600"><strong>Available Slots:</strong></p>
-                                                    {mentorData.mentorProfile.availableSlots.map((slot, index) => (
-                                                        <p key={index} className="text-gray-600 ml-4">{slot.day}: {slot.times?.join(', ') || 'N/A'}</p>
-                                                    ))}
-                                                </div>
-                                            ) : (
-                                                <p className="text-gray-600"><strong>Available Slots:</strong> Not set</p>
-                                            )}
-                                        </div>
-                                        <div>
-                                            <p className="text-gray-600"><strong>LinkedIn:</strong> {mentorData.mentorProfile.linkedIn || 'N/A'}</p>
-                                            <p className="text-gray-600"><strong>Portfolio:</strong> {mentorData.mentorProfile.portfolioUrl || 'N/A'}</p>
-                                            <p className="text-gray-600"><strong>Past Experience:</strong> {mentorData.mentorProfile.pastExperience ? 'Provided' : 'Not provided'}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-4">
-                                <DollarSign className="w-8 h-8 text-purple-600" />
-                                <div>
-                                    <h2 className="text-2xl font-semibold">Payment & Legal</h2>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                                        <div>
-                                            <p className="text-gray-600"><strong>Payment Method:</strong> {mentorData.mentorProfile.bankDetails?.paymentMethod || 'N/A'}</p>
-                                            <p className="text-gray-600"><strong>Account Number:</strong> {mentorData.mentorProfile.bankDetails?.accountNumber || 'N/A'}</p>
-                                            <p className="text-gray-600"><strong>Tax Info:</strong> {mentorData.mentorProfile.bankDetails?.taxInfo || 'N/A'}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-gray-600"><strong>NDA Consent:</strong> {mentorData.mentorProfile.ndaConsent ? 'Agreed' : 'Not agreed'}</p>
-                                            <p className="text-gray-600"><strong>Compliance Agreed:</strong> {mentorData.mentorProfile.complianceAgreed ? 'Yes' : 'No'}</p>
-                                            <p className="text-gray-600"><strong>Government ID:</strong> {mentorData.mentorProfile.governmentId ? 'Provided' : 'Not provided'}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Session Management */}
-                            <div className="border-t pt-6">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="flex items-center gap-4">
-                                        <Video className="w-8 h-8 text-purple-600" />
-                                        <div>
-                                            <h2 className="text-2xl font-semibold">My Sessions</h2>
-                                            <p className="text-gray-600">Manage your mentoring sessions</p>
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={() => setShowSessionForm(true)}
-                                        className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                                    >
-                                        <Plus className="w-4 h-4" />
-                                        Create Session
-                                    </button>
-                                </div>
-
-                                {sessions.length === 0 ? (
-                                    <div className="text-center py-8 bg-gray-50 rounded-lg">
-                                        <Video className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                                        <p className="text-gray-600">No sessions created yet</p>
-                                        <p className="text-gray-500 text-sm">Create your first session to start mentoring</p>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-4">
-                                        {sessions.map((session) => (
-                                            <div key={session._id} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <h3 className="text-lg font-semibold">{session.title}</h3>
-                                                    <button
-                                                        onClick={() => handleDeleteSession(session._id)}
-                                                        className="text-red-600 hover:text-red-800 transition-colors"
-                                                    >
-                                                        <X className="w-4 h-4" />
-                                                    </button>
-                                                </div>
-                                                <p className="text-gray-600 mb-2">{session.description}</p>
-                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                                                    <div>
-                                                        <strong>Type:</strong> {session.sessionType}
-                                                    </div>
-                                                    <div>
-                                                        <strong>Price:</strong> ${session.price}
-                                                    </div>
-                                                    <div>
-                                                        <strong>Duration:</strong> {session.duration}min
-                                                    </div>
-                                                    <div>
-                                                        <strong>Date:</strong> {new Date(session.scheduledDate).toLocaleDateString()}
-                                                    </div>
+                            {/* Navigation */}
+                            <nav className="flex-1 px-4 space-y-2">
+                                {sidebarItems.map((item) => {
+                                    if (!item.available) return null;
+                                    
+                                    const Icon = item.icon;
+                                    const isActive = activeSection === item.id;
+                                    
+                                    return (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => {
+                                                setActiveSection(item.id);
+                                                setSidebarOpen(false);
+                                            }}
+                                            className={`w-full group flex items-center px-4 py-3.5 text-sm font-medium rounded-xl transition-all duration-200 hover:scale-[1.02] ${
+                                                isActive
+                                                    ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg transform scale-[1.02]'
+                                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                            }`}
+                                        >
+                                            <Icon className={`mr-4 h-5 w-5 flex-shrink-0 transition-all duration-200 ${
+                                                isActive ? 'text-white' : 'text-gray-400 group-hover:text-indigo-500'
+                                            }`} />
+                                            <div className="text-left min-w-0 flex-1">
+                                                <div className="truncate font-semibold">{item.label}</div>
+                                                <div className={`text-xs truncate mt-0.5 ${
+                                                    isActive ? 'text-indigo-100' : 'text-gray-400'
+                                                }`}>
+                                                    {item.description}
                                                 </div>
                                             </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </>
-                    )}
+                                            {isActive && (
+                                                <div className="w-2 h-2 bg-white rounded-full ml-2 animate-pulse"></div>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </nav>
 
-                    {mentorData.mentorStatus === 'pending' && (
-                        <div className="flex items-center gap-4 p-4 bg-yellow-50 rounded-lg">
-                            <AlertCircle className="w-6 h-6 text-yellow-600" />
-                            <div>
-                                <h3 className="font-semibold text-yellow-800">Application Under Review</h3>
-                                <p className="text-yellow-700">We're currently reviewing your application. This process typically takes 2-3 business days.</p>
+                            {/* Sidebar Footer */}
+                            <div className="px-4 mt-6">
+                                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-100">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                                            <TrendingUp className="w-5 h-5 text-white" />
+                                        </div>
+                                        <div>
+                                            <div className="text-sm font-semibold text-gray-900">Grow Your Impact</div>
+                                            <div className="text-xs text-gray-600">Upgrade to Pro</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    )}
-                </div>
+                    </div>
+                </aside>
+
+                {/* Main Content Area */}
+                <main className="flex-1 overflow-y-auto min-w-0 bg-transparent">
+                    <div className="py-6 lg:py-8">
+                        <div className="max-w-7xl mx-auto px-4 lg:px-8">
+                            {/* Premium Status Banner */}
+                            {mentorData.mentorStatus === 'pending' && (
+                                <div className="mb-8 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 shadow-sm">
+                                    <div className="flex items-start space-x-4">
+                                        <div className="flex-shrink-0">
+                                            <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                                                <Shield className="h-5 w-5 text-amber-600" />
+                                            </div>
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <h3 className="text-lg font-semibold text-amber-900 mb-2">Application Under Review</h3>
+                                            <p className="text-amber-700 leading-relaxed">
+                                                We're currently reviewing your mentor application with care. Our team typically completes this process within 2-3 business days. You'll receive an email notification once the review is complete.
+                                            </p>
+                                            <div className="mt-4 bg-amber-100 rounded-lg p-3">
+                                                <div className="text-sm text-amber-800 font-medium">Next Steps:</div>
+                                                <ul className="mt-2 text-sm text-amber-700 space-y-1">
+                                                    <li>• Complete your profile information</li>
+                                                    <li>• Upload required verification documents</li>
+                                                    <li>• Set up your availability preferences</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Page Header */}
+                            <div className="mb-8">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent capitalize mb-2">
+                                            {activeSection}
+                                        </h1>
+                                        <p className="text-gray-500 text-lg">
+                                            Manage your {activeSection} settings and information
+                                        </p>
+                                    </div>
+                                    <div className="hidden lg:flex items-center space-x-4">
+                                        <div className="bg-white/80 backdrop-blur-sm rounded-xl px-4 py-2 border border-gray-200">
+                                            <div className="text-xs text-gray-500 uppercase tracking-wide font-medium">Status</div>
+                                            <div className={`text-sm font-semibold capitalize ${
+                                                mentorData?.mentorStatus === 'approved' ? 'text-emerald-600' : 
+                                                mentorData?.mentorStatus === 'pending' ? 'text-amber-600' : 'text-red-600'
+                                            }`}>
+                                                {mentorData?.mentorStatus}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Content */}
+                            <div className="min-w-0">
+                                {renderContent()}
+                            </div>
+                        </div>
+                    </div>
+                </main>
             </div>
 
-            {/* Session Creation Modal */}
-            {showSessionForm && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-2xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-                        <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-2xl font-bold">Create New Session</h2>
-                            <button
-                                onClick={() => setShowSessionForm(false)}
-                                className="text-gray-500 hover:text-gray-700"
-                            >
-                                <X className="w-6 h-6" />
-                            </button>
-                        </div>
-                        
-                        <form onSubmit={handleCreateSession} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
-                                <input
-                                    type="text"
-                                    value={sessionForm.title}
-                                    onChange={(e) => setSessionForm({...sessionForm, title: e.target.value})}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    required
-                                />
-                            </div>
-                            
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                                <textarea
-                                    value={sessionForm.description}
-                                    onChange={(e) => setSessionForm({...sessionForm, description: e.target.value})}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    rows="3"
-                                    required
-                                />
-                            </div>
-                            
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Session Type</label>
-                                    <select
-                                        value={sessionForm.sessionType}
-                                        onChange={(e) => setSessionForm({...sessionForm, sessionType: e.target.value})}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    >
-                                        <option value="1:1">1:1</option>
-                                        <option value="group">Group</option>
-                                        <option value="workshop">Workshop</option>
-                                    </select>
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Price ($)</label>
-                                    <input
-                                        type="number"
-                                        value={sessionForm.price}
-                                        onChange={(e) => setSessionForm({...sessionForm, price: Number(e.target.value)})}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Duration (minutes)</label>
-                                    <input
-                                        type="number"
-                                        value={sessionForm.duration}
-                                        onChange={(e) => setSessionForm({...sessionForm, duration: Number(e.target.value)})}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        required
-                                    />
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Max Participants</label>
-                                    <input
-                                        type="number"
-                                        value={sessionForm.maxParticipants}
-                                        onChange={(e) => setSessionForm({...sessionForm, maxParticipants: Number(e.target.value)})}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Scheduled Date</label>
-                                <input
-                                    type="datetime-local"
-                                    value={sessionForm.scheduledDate}
-                                    onChange={(e) => setSessionForm({...sessionForm, scheduledDate: e.target.value})}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    required
-                                />
-                            </div>
-                            
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
-                                    <input
-                                        type="time"
-                                        value={sessionForm.timeSlot.startTime}
-                                        onChange={(e) => setSessionForm({
-                                            ...sessionForm, 
-                                            timeSlot: {...sessionForm.timeSlot, startTime: e.target.value}
-                                        })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        required
-                                    />
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">End Time</label>
-                                    <input
-                                        type="time"
-                                        value={sessionForm.timeSlot.endTime}
-                                        onChange={(e) => setSessionForm({
-                                            ...sessionForm, 
-                                            timeSlot: {...sessionForm.timeSlot, endTime: e.target.value}
-                                        })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Timezone</label>
-                                <input
-                                    type="text"
-                                    value={sessionForm.timezone}
-                                    onChange={(e) => setSessionForm({...sessionForm, timezone: e.target.value})}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="e.g., UTC-5"
-                                    required
-                                />
-                            </div>
-                            
-                            <div className="flex gap-4 pt-4">
-                                <button
-                                    type="submit"
-                                    className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors"
-                                >
-                                    Create Session
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setShowSessionForm(false)}
-                                    className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
-            {/* Edit Application Modal */}
-            {showEditForm && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-2xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-                        <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-2xl font-bold">Edit Application</h2>
-                            <button
-                                onClick={() => setShowEditForm(false)}
-                                className="text-gray-500 hover:text-gray-700"
-                            >
-                                <X className="w-6 h-6" />
-                            </button>
-                        </div>
-                        
-                        <form onSubmit={handleUpdateApplication} className="space-y-6">
-                            {/* Basic Information */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                                    <input
-                                        type="tel"
-                                        value={mentorData.mentorProfile.phoneNumber || ''}
-                                        onChange={(e) => setMentorData({
-                                            ...mentorData,
-                                            mentorProfile: {...mentorData.mentorProfile, phoneNumber: e.target.value}
-                                        })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Timezone</label>
-                                    <input
-                                        type="text"
-                                        value={mentorData.mentorProfile.timezone || ''}
-                                        onChange={(e) => setMentorData({
-                                            ...mentorData,
-                                            mentorProfile: {...mentorData.mentorProfile, timezone: e.target.value}
-                                        })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="e.g., UTC-5"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Current Role</label>
-                                    <input
-                                        type="text"
-                                        value={mentorData.mentorProfile.currentRole || ''}
-                                        onChange={(e) => setMentorData({
-                                            ...mentorData,
-                                            mentorProfile: {...mentorData.mentorProfile, currentRole: e.target.value}
-                                        })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Current Organization</label>
-                                    <input
-                                        type="text"
-                                        value={mentorData.mentorProfile.currentOrganization || ''}
-                                        onChange={(e) => setMentorData({
-                                            ...mentorData,
-                                            mentorProfile: {...mentorData.mentorProfile, currentOrganization: e.target.value}
-                                        })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">LinkedIn URL</label>
-                                    <input
-                                        type="url"
-                                        value={mentorData.mentorProfile.linkedIn || ''}
-                                        onChange={(e) => setMentorData({
-                                            ...mentorData,
-                                            mentorProfile: {...mentorData.mentorProfile, linkedIn: e.target.value}
-                                        })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Portfolio URL</label>
-                                    <input
-                                        type="url"
-                                        value={mentorData.mentorProfile.portfolioUrl || ''}
-                                        onChange={(e) => setMentorData({
-                                            ...mentorData,
-                                            mentorProfile: {...mentorData.mentorProfile, portfolioUrl: e.target.value}
-                                        })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Past Experience</label>
-                                <textarea
-                                    value={mentorData.mentorProfile.pastExperience || ''}
-                                    onChange={(e) => setMentorData({
-                                        ...mentorData,
-                                        mentorProfile: {...mentorData.mentorProfile, pastExperience: e.target.value}
-                                    })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    rows="3"
-                                    placeholder="Describe your past experience and achievements..."
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Expertise Domains (comma-separated)</label>
-                                <input
-                                    type="text"
-                                    value={mentorData.mentorProfile.expertiseDomains?.join(', ') || ''}
-                                    onChange={(e) => setMentorData({
-                                        ...mentorData,
-                                        mentorProfile: {...mentorData.mentorProfile, expertiseDomains: e.target.value.split(',').map(item => item.trim()).filter(item => item)}
-                                    })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="e.g., Web Development, AI/ML, Product Management"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Mentorship Topics (comma-separated)</label>
-                                <input
-                                    type="text"
-                                    value={mentorData.mentorProfile.mentorshipTopics?.join(', ') || ''}
-                                    onChange={(e) => setMentorData({
-                                        ...mentorData,
-                                        mentorProfile: {...mentorData.mentorProfile, mentorshipTopics: e.target.value.split(',').map(item => item.trim()).filter(item => item)}
-                                    })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="e.g., Startup Strategy, Fundraising, Technical Architecture"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Session Types (comma-separated)</label>
-                                <input
-                                    type="text"
-                                    value={mentorData.mentorProfile.sessionTypes?.join(', ') || ''}
-                                    onChange={(e) => setMentorData({
-                                        ...mentorData,
-                                        mentorProfile: {...mentorData.mentorProfile, sessionTypes: e.target.value.split(',').map(item => item.trim()).filter(item => item)}
-                                    })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="e.g., 1:1, Group, Workshop"
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Session Price ($/hour)</label>
-                                    <input
-                                        type="number"
-                                        value={mentorData.mentorProfile.sessionPrice || 0}
-                                        onChange={(e) => setMentorData({
-                                            ...mentorData,
-                                            mentorProfile: {...mentorData.mentorProfile, sessionPrice: Number(e.target.value)}
-                                        })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Session Duration (minutes)</label>
-                                    <input
-                                        type="number"
-                                        value={mentorData.mentorProfile.sessionDuration || ''}
-                                        onChange={(e) => setMentorData({
-                                            ...mentorData,
-                                            mentorProfile: {...mentorData.mentorProfile, sessionDuration: e.target.value}
-                                        })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Booking Notice</label>
-                                <input
-                                    type="text"
-                                    value={mentorData.mentorProfile.bookingNotice || ''}
-                                    onChange={(e) => setMentorData({
-                                        ...mentorData,
-                                        mentorProfile: {...mentorData.mentorProfile, bookingNotice: e.target.value}
-                                    })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="e.g., 24 hours in advance"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Languages (comma-separated)</label>
-                                <input
-                                    type="text"
-                                    value={mentorData.mentorProfile.languages?.join(', ') || ''}
-                                    onChange={(e) => setMentorData({
-                                        ...mentorData,
-                                        mentorProfile: {...mentorData.mentorProfile, languages: e.target.value.split(',').map(item => item.trim()).filter(item => item)}
-                                    })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="e.g., English, Spanish, French"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Visibility</label>
-                                <select
-                                    value={mentorData.mentorProfile.visibility || 'public'}
-                                    onChange={(e) => setMentorData({
-                                        ...mentorData,
-                                        mentorProfile: {...mentorData.mentorProfile, visibility: e.target.value}
-                                    })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                >
-                                    <option value="public">Public</option>
-                                    <option value="invite-only">Invite Only</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Short Bio</label>
-                                <textarea
-                                    value={mentorData.mentorProfile.shortBio || ''}
-                                    onChange={(e) => setMentorData({
-                                        ...mentorData,
-                                        mentorProfile: {...mentorData.mentorProfile, shortBio: e.target.value}
-                                    })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    rows="3"
-                                    placeholder="A brief introduction about yourself..."
-                                />
-                            </div>
-                            
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Detailed Bio</label>
-                                <textarea
-                                    value={mentorData.mentorProfile.detailedBio || ''}
-                                    onChange={(e) => setMentorData({
-                                        ...mentorData,
-                                        mentorProfile: {...mentorData.mentorProfile, detailedBio: e.target.value}
-                                    })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    rows="4"
-                                    placeholder="A detailed description of your experience, achievements, and mentoring approach..."
-                                />
-                            </div>
-
-                            {/* Community Involvement */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Community Involvement</label>
-                                <div className="space-y-2">
-                                    <label className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            checked={mentorData.mentorProfile.communityInvolvement?.groupAMA || false}
-                                            onChange={(e) => setMentorData({
-                                                ...mentorData,
-                                                mentorProfile: {
-                                                    ...mentorData.mentorProfile,
-                                                    communityInvolvement: {
-                                                        ...mentorData.mentorProfile.communityInvolvement,
-                                                        groupAMA: e.target.checked
-                                                    }
-                                                }
-                                            })}
-                                            className="mr-2"
-                                        />
-                                        Group AMA Sessions
-                                    </label>
-                                    <label className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            checked={mentorData.mentorProfile.communityInvolvement?.contentWriting || false}
-                                            onChange={(e) => setMentorData({
-                                                ...mentorData,
-                                                mentorProfile: {
-                                                    ...mentorData.mentorProfile,
-                                                    communityInvolvement: {
-                                                        ...mentorData.mentorProfile.communityInvolvement,
-                                                        contentWriting: e.target.checked
-                                                    }
-                                                }
-                                            })}
-                                            className="mr-2"
-                                        />
-                                        Content Writing
-                                    </label>
-                                    <label className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            checked={mentorData.mentorProfile.communityInvolvement?.competitionJudge || false}
-                                            onChange={(e) => setMentorData({
-                                                ...mentorData,
-                                                mentorProfile: {
-                                                    ...mentorData.mentorProfile,
-                                                    communityInvolvement: {
-                                                        ...mentorData.mentorProfile.communityInvolvement,
-                                                        competitionJudge: e.target.checked
-                                                    }
-                                                }
-                                            })}
-                                            className="mr-2"
-                                        />
-                                        Competition Judge
-                                    </label>
-                                </div>
-                            </div>
-
-                            {/* Payment Details */}
-                            <div className="border-t pt-6 mt-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Details</h3>
-                                
-                                <div className="grid grid-cols-2 gap-4 mb-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Session Price (USD)
-                                        </label>
-                                        <input
-                                            type="number"
-                                            value={mentorData.mentorProfile.sessionPrice || ''}
-                                            onChange={(e) => setMentorData({
-                                                ...mentorData,
-                                                mentorProfile: {...mentorData.mentorProfile, sessionPrice: Number(e.target.value)}
-                                            })}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            placeholder="Enter session price"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Session Duration
-                                        </label>
-                                        <select
-                                            value={mentorData.mentorProfile.sessionDuration || ''}
-                                            onChange={(e) => setMentorData({
-                                                ...mentorData,
-                                                mentorProfile: {...mentorData.mentorProfile, sessionDuration: e.target.value}
-                                            })}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        >
-                                            <option value="">Select duration</option>
-                                            <option value="30 minutes">30 minutes</option>
-                                            <option value="45 minutes">45 minutes</option>
-                                            <option value="1 hour">1 hour</option>
-                                            <option value="1.5 hours">1.5 hours</option>
-                                            <option value="2 hours">2 hours</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Account Number
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={mentorData.mentorProfile.bankDetails?.accountNumber || ''}
-                                        onChange={(e) => setMentorData({
-                                            ...mentorData,
-                                            mentorProfile: {
-                                                ...mentorData.mentorProfile,
-                                                bankDetails: {
-                                                    ...mentorData.mentorProfile.bankDetails,
-                                                    accountNumber: e.target.value
-                                                }
-                                            }
-                                        })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        placeholder="Enter account number"
-                                    />
-                                </div>
-
-                                <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Payment Method
-                                    </label>
-                                    <select
-                                        value={mentorData.mentorProfile.bankDetails?.paymentMethod || ''}
-                                        onChange={(e) => setMentorData({
-                                            ...mentorData,
-                                            mentorProfile: {
-                                                ...mentorData.mentorProfile,
-                                                bankDetails: {
-                                                    ...mentorData.mentorProfile.bankDetails,
-                                                    paymentMethod: e.target.value
-                                                }
-                                            }
-                                        })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        <option value="">Select payment method</option>
-                                        <option value="bank transfer">Bank Transfer</option>
-                                        <option value="paypal">PayPal</option>
-                                        <option value="stripe">Stripe</option>
-                                        <option value="crypto">Cryptocurrency</option>
-                                    </select>
-                                </div>
-
-                                <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Tax Information
-                                    </label>
-                                    <textarea
-                                        value={mentorData.mentorProfile.bankDetails?.taxInfo || ''}
-                                        onChange={(e) => setMentorData({
-                                            ...mentorData,
-                                            mentorProfile: {
-                                                ...mentorData.mentorProfile,
-                                                bankDetails: {
-                                                    ...mentorData.mentorProfile.bankDetails,
-                                                    taxInfo: e.target.value
-                                                }
-                                            }
-                                        })}
-                                        rows="3"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        placeholder="Enter tax information"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Legal Agreements */}
-                            <div>
-                                <label className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        checked={mentorData.mentorProfile.ndaConsent || false}
-                                        onChange={(e) => setMentorData({
-                                            ...mentorData,
-                                            mentorProfile: {...mentorData.mentorProfile, ndaConsent: e.target.checked}
-                                        })}
-                                        className="mr-2"
-                                    />
-                                    I agree to sign NDAs when required
-                                </label>
-                            </div>
-                            
-                            <div className="flex gap-4 pt-4">
-                                <button
-                                    type="submit"
-                                    className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-                                >
-                                    Update Application
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setShowEditForm(false)}
-                                    className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+            {/* Modals */}
+            <SessionFormModal 
+                showSessionForm={showSessionForm}
+                setShowSessionForm={setShowSessionForm}
+                sessionForm={sessionForm}
+                setSessionForm={setSessionForm}
+                handleCreateSession={handleCreateSession}
+            />
+            <EditApplicationModal 
+                showEditForm={showEditForm}
+                setShowEditForm={setShowEditForm}
+                mentorData={mentorData}
+                setMentorData={setMentorData}
+                handleUpdateApplication={handleUpdateApplication}
+            />
         </div>
     );
 }

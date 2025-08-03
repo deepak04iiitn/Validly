@@ -137,15 +137,10 @@ const userSchema = new mongoose.Schema({
             times: [String]
         }],
         bookingNotice: { type: String, default: '' },
-        governmentId: { type: String, default: '' },
-        credentials: [{ type: String }],
-        introVideo: { type: String, default: '' },
         bankDetails: {
             accountNumber: { type: String, default: '' },
             paymentMethod: { type: String, default: '' },
-            taxInfo: { type: String, default: '' }
         },
-        ndaConsent: { type: Boolean, default: false },
         shortBio: { type: String, default: '' },
         detailedBio: { type: String, default: '' },
         languages: { type: [String], default: [] },
